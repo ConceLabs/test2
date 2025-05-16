@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<base href="./"/>
+<title>Biblioteca Jurídica – ANF</title>
+<meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" name="viewport"/>
+<meta name="theme-color" content="#1f334d"> <!-- Color para la barra de estado en móviles -->
+<link href="manifest.json" rel="manifest"/>
+<link href="favicon.ico" rel="icon"/>
+<link href="apple-touch-icon.png" rel="apple-touch-icon"/>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mark.js@8.11.1/dist/mark.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
+<link href="estilo_juridico_optimizado.css" rel="stylesheet"/>
+</head>
+<body>
+
+<div id="loading-spinner" class="loading-spinner hidden">
+  <div class="spinner"></div>
+</div>
+
+<header class="main-search">
+  <div class="title-bar">
+    <img alt="Logo ANF" class="logo" src="logo-1.png"/>
+    <h1>Biblioteca Jurídica</h1>
+    <div class="search-toggle">
+      <button id="toggle-search" class="btn" aria-label="Abrir búsqueda"><i class="fa-solid fa-magnifying-glass"></i></button>
+    </div>
+  </div>
+  <div class="search-bar hidden" id="search-bar">
+    <i class="fa-solid fa-magnifying-glass search-bar-icon"></i>
+    <input id="search" placeholder="Buscar por título o contenido…" aria-label="Campo de búsqueda"/>
+    <button id="clear-search" class="clear-btn hidden" aria-label="Limpiar búsqueda"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+</header>
+
+<div id="app">
+  <div id="home-view">
+    <div class="toolbar" id="view-toolbar">
+      <div class="view-btns">
+        <button class="btn active" id="grid-view-btn" aria-label="Vista de cuadrícula"><i class="fa-solid fa-table-cells"></i></button>
+        <button class="btn" id="list-view-btn" aria-label="Vista de lista"><i class="fa-solid fa-list"></i></button>
+      </div>
+      <!-- Podrías mover el toggle-search aquí si prefieres que solo aparezca en home-view -->
+    </div>
+    <div class="doc-list-container" id="docListContainer"> <!-- Contenedor para scroll -->
+      <div class="doc-grid" id="docList"></div>
+    </div>
+    <div class="search-results hidden" id="search-results"> <!-- Cambiado a hidden por defecto -->
+      <button id="prev-result" aria-label="Resultado anterior"><i class="fa-solid fa-chevron-up"></i></button>
+      <span id="result-counter">0 de 0</span>
+      <button id="next-result" aria-label="Siguiente resultado"><i class="fa-solid fa-chevron-down"></i></button>
+      <button id="close-search-results" aria-label="Cerrar resultados de búsqueda"><i class="fa-solid fa-xmark"></i></button> <!-- Renombrado para claridad -->
+    </div>
+  </div>
+
+  <div class="toolbar hidden" id="doc-toolbar">
+    <button class="btn" id="btn-back" aria-label="Volver al inicio"><i class="fa-solid fa-house"></i></button>
+    <span id="doc-viewer-title" class="doc-viewer-title"></span> <!-- Para mostrar el título del doc actual -->
+    <div class="zoom-controls">
+      <button class="btn zoom-btn" id="btn-font-decrease" aria-label="Reducir tamaño de fuente"><i class="fa-solid fa-minus"></i></button>
+      <button class="btn zoom-btn" id="btn-font-increase" aria-label="Aumentar tamaño de fuente"><i class="fa-solid fa-plus"></i></button>
+    </div>
+  </div>
+
+  <div id="viewer" class="viewer-container"></div> <!-- Añadida clase para consistencia -->
+
+  <div id="minutas-view" class="hidden"> <!-- Añadido hidden para que no se muestre al inicio -->
+    <header class="minutas-header"> <!-- Cambiada clase para evitar colisión y ser más específico -->
+      <h1>Minutas Jurisprudencia</h1>
+      <button class="home-btn" id="home-btn" aria-label="Volver al inicio"><i class="fa-solid fa-house"></i> Inicio</button>
+    </header>
+    <div class="minutas-controls">
+      <select class="cat-filter" id="minutas-catFilter" aria-label="Filtrar minutas por categoría">
+        <option value="all">Todas las categorías</option>
+        <option value="Control de Identidad">Control de Identidad</option>
+        <option value="Detención y Aprehensión">Detención y Aprehensión</option>
+        <option value="Diligencias e Investigación">Diligencias e Investigación</option>
+        <option value="Evidencia y Cadena de Custodia">Evidencia y Cadena de Custodia</option>
+        <option value="Procedimiento y Garantías">Procedimiento y Garantías</option>
+        <option value="Delitos y Tipicidad">Delitos y Tipicidad</option>
+        <option value="Categoría Ejemplo">Categoría Ejemplo</option> <!-- Asegúrate que esta categoría exista o esté en tu JS -->
+      </select>
+    </div>
+    <div class="doc-list-container" id="minutasDocListContainer"> <!-- Contenedor para scroll -->
+       <div id="minutas-docList"></div>
+    </div>
+    <div id="minutas-viewer" class="viewer-container"></div> <!-- Añadida clase para consistencia -->
+  </div>
+</div>
+
+<script>
+  // Registro del Service Worker
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js')
+        .then(registration => {
+          console.log('ServiceWorker registration successful with scope: ', registration.scope);
+        })
+        .catch(err => {
+          console.log('ServiceWorker registration failed: ', err);
+        });
+    });
+  }
+</script>
+<script src="js/app.js"></script>
+</body>
+</html>

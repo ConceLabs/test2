@@ -1,0 +1,516 @@
+:root {
+  --primary: #1f334d;
+  --primary-light: #2f4a73; /* Un poco más claro para hovers */
+  --secondary: #007bff; /* Un color de acento */
+  --bg: #f0f2f5; /* Ligeramente más suave */
+  --text: #333;
+  --text-light: #666;
+  --card-bg: #fff;
+  --radius: 8px; /* Un poco menos redondeado para un look más nítido */
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0,0,0,0.03); /* Sombra más sutil */
+  --shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.1), 0 2px 6px rgba(0,0,0,0.05);
+  --header-height: 56px; /* Altura fija para el header */
+  --toolbar-height: 48px;
+  --minutas-header-height: 56px;
+  --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-heading: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; /* O una fuente más distintiva si tienes */
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(0,0,0,0.05);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.2);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0,0,0,0.3);
+}
+
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  overflow: hidden; /* Evitar scroll en body, se manejará en #app o hijos */
+  font-size: 16px; /* Base font size */
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* Loading Spinner */
+.loading-spinner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.8);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.spinner {
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border-left-color: var(--primary);
+  animation: spin 1s ease infinite;
+}
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh; /* Ocupa toda la altura de la ventana */
+  overflow: hidden; /* El scroll principal se manejará dentro de los hijos */
+}
+
+#home-view, #minutas-view {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1; /* Ocupa el espacio restante */
+  overflow: hidden; /* Contenedor para que sus hijos puedan hacer scroll */
+  position: relative; /* Para el posicionamiento de search-results */
+}
+
+/* Contenedor para las listas de documentos para que tengan su propio scroll */
+.doc-list-container {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 0.75rem;
+  -webkit-overflow-scrolling: touch;
+}
+
+#docList, #minutas-docList {
+  /* Ya no necesitan flex:1 ni overflow-y: auto, lo maneja el padre .doc-list-container */
+  /* padding: 0.75rem; no, se aplica al contenedor */
+  -webkit-overflow-scrolling: touch;
+}
+
+
+.viewer-container, /* Clase común para #viewer y #minutas-viewer */
+#viewer, 
+#minutas-viewer {
+  display: none; /* Se mostrará por JS */
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 1rem 1.5rem; /* Más padding */
+  background: #fff;
+  line-height: 1.7;
+  text-align: justify;
+  -webkit-overflow-scrolling: touch;
+  font-size: 1rem; /* Tamaño base del viewer */
+}
+
+#minutas-viewer {
+  padding: 1rem 1.5rem .75rem; /* Ajuste específico si es necesario */
+}
+
+/* Header principal */
+header.main-search {
+  background: var(--primary);
+  color: #fff;
+  padding: 0 1rem; /* Padding horizontal */
+  height: var(--header-height);
+  display: flex;
+  flex-direction: column; /* Para acomodar title-bar y search-bar */
+  justify-content: center;
+  z-index: 100; /* Más alto que el search-results */
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  position: sticky; /* O fixed si lo quieres siempre arriba sin importar el scroll de la app */
+  top: 0;
+}
+
+header.main-search .title-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%; /* Si search-bar está oculta, ocupa toda la altura */
+}
+header.main-search .title-bar img.logo {
+  height: 30px; /* Ajustar según necesidad */
+  width: auto;
+  margin-right: 0.75rem;
+}
+header.main-search .title-bar h1 {
+  font-family: var(--font-heading);
+  font-size: 1.1rem; /* Ligeramente más pequeño */
+  font-weight: 600;
+  margin: 0;
+  flex-grow: 1; /* Para que empuje el botón de search a la derecha */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+header.main-search .search-bar {
+  background: var(--bg); /* Fondo más suave */
+  border-radius: var(--radius);
+  padding: 0.5rem 1rem;
+  display: flex;
+  align-items: center;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.07);
+  margin-top: 0.5rem; /* Espacio si está debajo del title-bar */
+  transition: all 0.3s ease; /* Transición suave */
+}
+header.main-search .search-bar.hidden {
+  /* Se mantiene display: none !important, pero si se anima, se haría diferente */
+  margin-top: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  height: 0;
+  opacity: 0;
+  overflow: hidden;
+}
+header.main-search .search-bar .search-bar-icon {
+  color: var(--text-light);
+  margin-right: 0.5rem;
+}
+header.main-search .search-bar input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: .25rem 0;
+  font-size: 0.95rem;
+  outline: none;
+  color: var(--text);
+}
+header.main-search .search-bar input::placeholder {
+  color: var(--text-light);
+}
+
+.clear-btn {
+  background: none;
+  border: none;
+  color: var(--text-light);
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 0.25rem;
+  margin-left: 0.5rem;
+  transition: color 0.2s ease;
+}
+.clear-btn:hover {
+  color: var(--text);
+}
+
+/* Toolbar general */
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--card-bg); /* Fondo blanco */
+  padding: .5rem .75rem;
+  border-bottom: 1px solid #e0e0e0; /* Borde más sutil */
+  height: var(--toolbar-height);
+  box-sizing: border-box;
+}
+
+.toolbar .doc-viewer-title {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text);
+  margin: 0 1rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex-grow: 1;
+  text-align: center;
+}
+
+
+.btn {
+  background: transparent; /* Botones más limpios */
+  border: 1px solid transparent; /* Para mantener tamaño en hover/active */
+  border-radius: 50%;
+  width: 38px; /* Un poco más grande */
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary);
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+}
+.btn:hover {
+  background: rgba(31, 51, 77, 0.1); /* Hover sutil */
+}
+.btn.active {
+  background: var(--primary);
+  color: #fff;
+  box-shadow: var(--shadow);
+}
+.btn:focus-visible { /* Mejor accesibilidad para teclado */
+    outline: 2px solid var(--secondary);
+    outline-offset: 2px;
+}
+
+
+.view-btns {
+  display: flex;
+  gap: .5rem;
+}
+
+.zoom-controls {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* Tarjetas de documentos */
+.doc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* Más responsive */
+  gap: 1rem; /* Un poco más de espacio */
+  padding-bottom: 20px;
+}
+
+.doc-list { /* Estilo para la vista de lista */
+  display: flex;
+  flex-direction: column;
+  gap: .75rem;
+  padding-bottom: 20px;
+}
+
+.doc-item {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: .75rem;
+  box-shadow: var(--shadow);
+  border-left: 4px solid var(--primary); /* Borde lateral */
+  transition: transform .2s ease, box-shadow .2s ease;
+  cursor: pointer;
+  position: relative; /* Para elementos hijos si es necesario */
+}
+.doc-item:hover {
+  transform: translateY(-3px); /* Efecto de elevación sutil */
+  box-shadow: var(--shadow-hover);
+}
+
+/* Estilos para .doc-item cuando está en .doc-list (vista de lista) */
+.doc-list .doc-item {
+  flex-direction: row;
+  text-align: left;
+  align-items: center;
+  padding: 0.75rem 1rem;
+}
+.doc-list .doc-item .doc-icon {
+  font-size: 1.5rem; /* Icono más pequeño en lista */
+  margin-right: 1rem;
+  flex-shrink: 0; /* Evita que el icono se encoja */
+}
+.doc-list .doc-item .doc-title {
+  font-size: 0.9rem; /* Título ligeramente más grande en lista */
+  flex-grow: 1; /* Para que ocupe el espacio */
+}
+.doc-list .doc-item .doc-category { /* Para minutas en vista de lista */
+    font-size: 0.75rem;
+    color: var(--text-light);
+    margin-left: auto; /* Empuja a la derecha */
+    padding-left: 0.5rem;
+    white-space: nowrap;
+}
+
+
+.doc-icon {
+  font-size: 1.8rem; /* Ligeramente más pequeño */
+  color: var(--primary);
+  margin-bottom: 0.25rem;
+}
+.doc-title {
+  font-weight: 500; /* Un poco menos bold */
+  font-size: .9rem;
+  line-height: 1.3;
+  color: var(--text);
+}
+.doc-category { /* Estilo para la categoría en las tarjetas de minutas */
+  font-size: 0.75rem;
+  color: var(--text-light);
+  background-color: var(--bg);
+  padding: 0.2em 0.5em;
+  border-radius: 4px;
+  margin-top: 0.5rem;
+}
+
+
+/* Minutas */
+#minutas-view {
+  /* Ya tiene flex:1, overflow:hidden etc desde .view */
+}
+#minutas-view .minutas-header { /* Clase más específica */
+  background: var(--primary);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1rem;
+  height: var(--minutas-header-height);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+#minutas-view .minutas-header h1 {
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  margin: 0;
+  font-weight: 600;
+}
+
+.home-btn {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.3);
+  color: #fff;
+  border-radius: var(--radius);
+  padding: .5rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.2s ease;
+}
+.home-btn:hover {
+  background: rgba(255,255,255,0.2);
+}
+.home-btn i {
+  font-size: 0.9em; /* Ajusta el icono dentro del botón */
+}
+
+.minutas-controls {
+  padding: .75rem;
+  background-color: var(--card-bg);
+  border-bottom: 1px solid #e0e0e0;
+}
+.cat-filter {
+  width: 100%;
+  padding: .6rem .75rem; /* Más padding vertical */
+  border: 1px solid #ccc;
+  border-radius: var(--radius);
+  background-color: #fff; /* Fondo blanco */
+  font-size: 0.95rem;
+  height: auto; /* Quitar altura fija */
+  box-sizing: border-box;
+}
+.cat-filter:focus {
+  border-color: var(--secondary);
+  box-shadow: 0 0 0 2px rgba(0,123,255,.25);
+  outline: none;
+}
+
+#minutas-docList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* Minutas pueden ser más anchas */
+  gap: 1rem;
+  /* padding ya no es necesario aquí, está en el contenedor */
+  /* height y overflow ya no son necesarios aquí */
+}
+
+
+/* Busqueda resultados */
+.search-results {
+  position: fixed; /* O absolute si prefieres que se mueva con el scroll de la lista */
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--primary);
+  color: #fff;
+  padding: 0.6rem 1rem;
+  border-radius: var(--radius);
+  display: flex; /* JS lo cambiará de .hidden a display:flex */
+  align-items: center;
+  gap: 0.75rem;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  z-index: 50; /* Menor que el header */
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.search-results.hidden { /* Para animar la ocultación */
+    opacity: 0;
+    transform: translate(-50%, 20px); /* Moverlo hacia abajo al ocultar */
+    pointer-events: none; /* Evitar interacciones cuando está oculto */
+}
+.search-results button {
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.search-results button:hover {
+  background: rgba(255,255,255,0.2);
+}
+.search-results #result-counter {
+  font-size: 0.9rem;
+  min-width: 60px; /* Para evitar saltos de tamaño */
+  text-align: center;
+}
+
+
+/* Global Font Size Control - Aplicar a body o #app */
+/* Estas clases serán añadidas al body por JS */
+/* Ajusta estos valores según la fuente base de 16px */
+
+body.font-size-xs { font-size: 13px; }
+body.font-size-s  { font-size: 14.5px; }
+body.font-size-m  { font-size: 16px; } /* Default */
+body.font-size-l  { font-size: 17.5px; }
+body.font-size-xl { font-size: 19px; }
+
+/* Ejemplo de cómo los viewers pueden reaccionar al zoom global */
+/* (Opcional si el cambio de font-size en body es suficiente) */
+/*
+body.font-size-xs .viewer-container { font-size: 0.8rem; }
+body.font-size-s .viewer-container  { font-size: 0.9rem; }
+body.font-size-m .viewer-container  { font-size: 1.0rem; }
+body.font-size-l .viewer-container  { font-size: 1.1rem; }
+body.font-size-xl .viewer-container { font-size: 1.2rem; }
+*/
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  header.main-search .title-bar h1 {
+    font-size: 1rem;
+  }
+  .doc-grid {
+    grid-template-columns: 1fr; /* Una columna en móviles */
+  }
+  #minutas-docList {
+    grid-template-columns: 1fr; /* Una columna en móviles */
+  }
+  .viewer-container, #minutas-viewer {
+    padding: 0.75rem 1rem;
+  }
+  .search-results {
+    width: calc(100% - 2rem); /* Más ancho en móviles */
+    bottom: 0.5rem;
+    border-radius: var(--radius) var(--radius) 0 0; /* Redondeo solo arriba si está pegado abajo */
+  }
+  .main-search .search-bar { /* Si search bar está visible en doc view */
+     margin-top: 0.25rem;
+  }
+}
