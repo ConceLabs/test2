@@ -8,7 +8,6 @@ const listBtn = document.getElementById('list-view-btn');
 const docListContainer = document.getElementById('docListContainer');
 const docList = document.getElementById('docList');
 
-// Toolbar y elementos del visor de documentos
 const docViewerToolbar = document.getElementById('doc-viewer-toolbar');
 const docViewerTitleText = document.getElementById('doc-viewer-title-text');
 const btnBackToHome = document.getElementById('btn-back-to-home');
@@ -16,15 +15,13 @@ const btnZoomIn = document.getElementById('btn-font-increase');
 const btnZoomOut = document.getElementById('btn-font-decrease');
 const viewer = document.getElementById('viewer');
 
-// Elementos de Minutas
-const minutasView = document.getElementById('minutas-view'); // Contenedor general de la sección de minutas
+const minutasView = document.getElementById('minutas-view');
 const homeBtnMinutas = document.getElementById('home-btn-minutas');
 const minutasCatFilter = document.getElementById('minutas-catFilter');
-const minutasDocListContainer = document.getElementById('minutasDocListContainer'); // Lista de minutas
+const minutasDocListContainer = document.getElementById('minutasDocListContainer');
 const minutasDocList = document.getElementById('minutas-docList');
-const minutasViewer = document.getElementById('minutas-viewer'); // Visor para una minuta individual
+const minutasViewer = document.getElementById('minutas-viewer');
 
-// Elementos de Búsqueda
 const toggleSearchBtnHeader = document.getElementById('toggle-search-btn-header');
 const searchBarContainer = document.getElementById('search-bar-container');
 const searchInputMain = document.getElementById('search-input-main');
@@ -43,7 +40,7 @@ let currentDocumentTitle = '';
 let markInstance = null;
 
 const zoomLevels = ['font-size-xs', 'font-size-s', 'font-size-m', 'font-size-l', 'font-size-xl'];
-let currentZoomIndex = 2; // Default: font-size-m
+let currentZoomIndex = 2;
 
 // --- DATOS ---
 const docs = [
@@ -94,7 +91,6 @@ const docsMinutas = [
   { path: 'minutas/31_INSTRUCCION_PRIMERAS_DILIGENCIAS.md', title: 'N° 31 INSTRUCCIÓN SOBRE PRIMERAS DILIGENCIAS', category: 'Diligencias e Investigación' },
   { path: 'minutas/32_OTRA_MINUTA.md', title: 'N° 32 OTRA MINUTA Ejemplo', category: 'Categoría Ejemplo' }
 ];
-
 
 // --- FUNCIONES AUXILIARES ---
 function showLoading(show) { loadingSpinner.classList.toggle('hidden', !show); }
@@ -168,14 +164,14 @@ minutasCatFilter.addEventListener('change', loadMinutas);
 
 // --- LÓGICA DE VISTAS Y NAVEGACIÓN ---
 function changeViewMode(mode) {
-  console.log(`changeViewMode(${mode})`); // DEBUG
+  // console.log(`changeViewMode(${mode})`);
   const isGrid = mode === 'grid';
   docList.className = isGrid ? 'doc-grid' : 'doc-list';
   minutasDocList.className = isGrid ? 'doc-grid' : 'doc-list';
 }
 
 function populateDocList(targetElement, documents, isMinutas = false) {
-  console.log(`populateDocList para ${targetElement.id}, ${documents.length} items, isMinutas: ${isMinutas}`); // DEBUG
+  // console.log(`populateDocList para ${targetElement.id}, ${documents.length} items, isMinutas: ${isMinutas}`);
   targetElement.innerHTML = '';
   const fragment = document.createDocumentFragment();
   documents.forEach(doc => {
@@ -193,86 +189,83 @@ function populateDocList(targetElement, documents, isMinutas = false) {
   targetElement.appendChild(fragment);
 }
 
-function loadDocs() {
-  console.log("loadDocs()"); // DEBUG
-  populateDocList(docList, docs);
+function loadDocs() { 
+    // console.log("loadDocs()"); 
+    populateDocList(docList, docs); 
 }
 
 function showHome() {
-  console.log("showHome() llamado"); // DEBUG
+  // console.log("showHome() llamado");
   homeView.style.display = 'flex';
-  minutasView.classList.add('hidden'); // Ocultar todo el contenedor de minutas
+  minutasView.classList.add('hidden');
   viewer.style.display = 'none';
   minutasViewer.style.display = 'none';
-  docViewerToolbar.classList.add('hidden');
+  docViewerToolbar.classList.add('hidden'); // Toolbar del visor se oculta
 
-  searchBarContainer.classList.add('hidden');
+  searchBarContainer.classList.add('hidden'); // Barra de input de búsqueda se oculta
   document.body.classList.remove('search-bar-visible');
-  searchResultsBar.classList.add('hidden');
+  searchResultsBar.classList.add('hidden'); // Barra de resultados se oculta
   
   clearView();
   currentActiveContainer = null;
   docViewerTitleText.textContent = '';
   document.title = 'Biblioteca Jurídica – ANF';
-  if (toggleSearchBtnHeader) toggleSearchBtnHeader.style.display = 'block'; // Asegurar visibilidad
+  if (toggleSearchBtnHeader) toggleSearchBtnHeader.style.display = 'block';
 }
 
 function clearView() {
-  console.log("clearView()"); // DEBUG
+  // console.log("clearView()");
   viewer.innerHTML = '';
   minutasViewer.innerHTML = '';
   clearHighlights();
 }
 
 async function openDoc(path, title) {
-  console.log(`openDoc() llamado con path: ${path}, title: ${title}`); // DEBUG
+  // console.log(`openDoc() llamado con path: ${path}, title: ${title}`);
   showLoading(true);
   clearView();
   
   homeView.style.display = 'none';
-  docViewerToolbar.classList.remove('hidden');
+  docViewerToolbar.classList.remove('hidden'); // Toolbar del visor se muestra
   docViewerTitleText.textContent = title;
   currentDocumentTitle = title;
-  searchResultsBar.classList.add('hidden'); // Ocultar resultados de búsqueda anteriores
+  searchResultsBar.classList.add('hidden');
 
   let targetViewer;
   if (path.startsWith('minutas/')) {
-    console.log("Abriendo minuta..."); // DEBUG
-    minutasView.classList.remove('hidden'); // Mostrar el CONTENEDOR general de minutas
-    minutasDocListContainer.style.display = 'none'; // Ocultar la LISTA de minutas
+    // console.log("Abriendo minuta...");
+    minutasView.classList.remove('hidden'); 
+    minutasDocListContainer.style.display = 'none'; 
     if (minutasCatFilter.parentElement) minutasCatFilter.parentElement.style.display = 'none';
     
-    viewer.style.display = 'none'; // Ocultar el visor principal por si acaso
-    minutasViewer.style.display = 'block'; // Mostrar el VISOR de minutas
-    console.log("minutasViewer display set to block"); // DEBUG
+    viewer.style.display = 'none'; 
+    minutasViewer.style.display = 'block'; 
     targetViewer = minutasViewer;
-    if (toggleSearchBtnHeader) toggleSearchBtnHeader.style.display = 'block'; // Ocultar botón de búsqueda del header si es minuta individual
+    if (toggleSearchBtnHeader) toggleSearchBtnHeader.style.display = 'block';
   } else {
-    console.log("Abriendo documento normal..."); // DEBUG
-    minutasView.classList.add('hidden'); // Ocultar todo el contenedor de minutas
-    minutasViewer.style.display = 'none'; // Ocultar el visor de minutas por si acaso
+    // console.log("Abriendo documento normal...");
+    minutasView.classList.add('hidden'); 
+    minutasViewer.style.display = 'none'; 
 
-    viewer.style.display = 'block'; // Mostrar el visor principal
-    console.log("viewer display set to block"); // DEBUG
+    viewer.style.display = 'block'; 
     targetViewer = viewer;
-    if (toggleSearchBtnHeader) toggleSearchBtnHeader.style.display = 'block'; // Asegurar que el botón de búsqueda esté para docs normales
+    if (toggleSearchBtnHeader) toggleSearchBtnHeader.style.display = 'block';
   }
 
   if (!targetViewer) {
-      console.error("CRITICAL: targetViewer no se estableció. No se puede cargar el documento.");
+      console.error("CRITICAL: targetViewer no se estableció.");
       showLoading(false);
       return;
   }
   currentActiveContainer = targetViewer;
-  console.log("currentActiveContainer es:", currentActiveContainer ? currentActiveContainer.id : "null");
-
+  // console.log("currentActiveContainer es:", currentActiveContainer ? currentActiveContainer.id : "null");
 
   try {
     const response = await fetch(path);
-    console.log(`Fetch response for ${path}: status ${response.status}, ok: ${response.ok}`); // DEBUG
+    // console.log(`Fetch response for ${path}: status ${response.status}, ok: ${response.ok}`);
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status} for ${path}`);
     const content = await response.text();
-    console.log(`Contenido cargado para ${path} (primeros 100 chars):`, content.substring(0, 100)); // DEBUG
+    // console.log(`Contenido cargado para ${path} (primeros 100 chars):`, content.substring(0, 100));
     
     if (path.endsWith('.html')) {
       targetViewer.innerHTML = content;
@@ -294,17 +287,14 @@ async function openDoc(path, title) {
     }
 
   } catch (err) {
-    console.error("Error en openDoc al cargar contenido:", err); // DEBUG
+    console.error("Error en openDoc al cargar contenido:", err);
     if (targetViewer) {
         targetViewer.innerHTML = `<div class="error-container" style="padding:1rem; color:red;"><h4>Error al cargar documento:</h4><p>${path}</p><p>${err.message}</p></div>`;
     }
   } finally {
     showLoading(false);
     if (targetViewer) targetViewer.scrollTop = 0;
-    console.log("openDoc() finalizado. Estado de visores:", 
-        "viewer.display:", viewer.style.display, 
-        "minutasViewer.display:", minutasViewer.style.display
-    ); // DEBUG
+    // console.log("openDoc() finalizado. Estado de visores:", "viewer.display:", viewer.style.display, "minutasViewer.display:", minutasViewer.style.display);
   }
 }
 
@@ -312,7 +302,7 @@ async function openDoc(path, title) {
 function applyGlobalZoom() {
   zoomLevels.forEach(level => document.body.classList.remove(level));
   document.body.classList.add(zoomLevels[currentZoomIndex]);
-  console.log("Zoom aplicado:", zoomLevels[currentZoomIndex]); // DEBUG
+  // console.log("Zoom aplicado:", zoomLevels[currentZoomIndex]);
 }
 function changeGlobalZoom(delta) {
   const newZoomIndex = currentZoomIndex + delta;
@@ -324,7 +314,7 @@ function changeGlobalZoom(delta) {
 
 // --- FUNCIONES DE BÚSQUEDA ---
 function clearHighlights() {
-  console.log("clearHighlights()"); // DEBUG
+  // console.log("clearHighlights()");
   if (markInstance) {
     markInstance.unmark();
     markInstance = null;
@@ -335,40 +325,38 @@ function clearHighlights() {
 }
 
 function performSearch(term) {
-  console.log(`performSearch("${term}")`); // DEBUG
+  // console.log(`performSearch("${term}")`);
   if (!currentActiveContainer) {
-    console.log("performSearch: No hay currentActiveContainer"); // DEBUG
+    // console.log("performSearch: No hay currentActiveContainer");
     searchResultsBar.classList.add('hidden');
     return;
   }
   clearHighlights();
 
   if (!term) {
-    console.log("performSearch: Término vacío"); // DEBUG
+    // console.log("performSearch: Término vacío");
     searchResultsBar.classList.add('hidden');
     return;
   }
 
   markInstance = new Mark(currentActiveContainer);
   markInstance.mark(term, {
-    separateWordSearch: false,
-    className: 'highlighted-match',
-    accuracy: "partially",
-    ignoreJoiners: true,
+    separateWordSearch: false, className: 'highlighted-match',
+    accuracy: "partially", ignoreJoiners: true,
     done: (_count) => {
       matches = Array.from(currentActiveContainer.querySelectorAll('mark.highlighted-match'));
-      console.log(`Búsqueda finalizada, ${matches.length} resultados.`); // DEBUG
+      // console.log(`Búsqueda finalizada, ${matches.length} resultados.`);
       if (matches.length > 0) {
         currentIndex = 0;
         scrollToMatch();
-        searchResultsBar.classList.remove('hidden');
+        searchResultsBar.classList.remove('hidden'); // Mostrar barra de resultados
       } else {
-        searchResultsBar.classList.add('hidden');
+        searchResultsBar.classList.add('hidden'); // Ocultar si no hay resultados
       }
       updateResultsUI();
     },
     noMatch: (_term) => {
-        console.log("Búsqueda sin resultados para:", _term); // DEBUG
+        // console.log("Búsqueda sin resultados para:", _term);
         searchResultsBar.classList.add('hidden');
         updateResultsUI();
     }
@@ -376,7 +364,7 @@ function performSearch(term) {
 }
 
 function scrollToMatch() {
-  console.log(`scrollToMatch(), currentIndex: ${currentIndex}, matches.length: ${matches.length}`); // DEBUG
+  // console.log(`scrollToMatch(), currentIndex: ${currentIndex}, matches.length: ${matches.length}`);
   if (!matches.length || currentIndex < 0 || currentIndex >= matches.length) return;
   
   const prevCurrent = currentActiveContainer.querySelector('mark.current-match');
@@ -388,7 +376,7 @@ function scrollToMatch() {
 }
 
 function navigateResults(direction) {
-  console.log(`navigateResults(${direction})`); // DEBUG
+  // console.log(`navigateResults(${direction})`);
   if (!matches.length) return;
   currentIndex = (currentIndex + direction + matches.length) % matches.length;
   scrollToMatch();
@@ -396,7 +384,7 @@ function navigateResults(direction) {
 }
 
 function updateResultsUI() {
-  console.log(`updateResultsUI(), matches: ${matches.length}, currentIndex: ${currentIndex}`); // DEBUG
+  // console.log(`updateResultsUI(), matches: ${matches.length}, currentIndex: ${currentIndex}`);
   if (matches.length > 0 && !searchResultsBar.classList.contains('hidden')) {
     resultCounterSpan.textContent = `${currentIndex + 1} de ${matches.length}`;
   } else {
@@ -406,19 +394,19 @@ function updateResultsUI() {
 
 // --- FUNCIONES DE MINUTAS ---
 function showMinutasListView() {
-  console.log("showMinutasListView()"); // DEBUG
+  // console.log("showMinutasListView()");
   homeView.style.display = 'none';
-  viewer.style.display = 'none'; // Ocultar visor principal
-  minutasViewer.style.display = 'none'; // Ocultar visor de minutas individual
-  docViewerToolbar.classList.add('hidden');
+  viewer.style.display = 'none';
+  minutasViewer.style.display = 'none';
+  docViewerToolbar.classList.add('hidden'); // Toolbar del visor se oculta
   
-  minutasView.classList.remove('hidden'); // Mostrar el contenedor general de minutas
-  minutasDocListContainer.style.display = 'block'; // Mostrar la LISTA de minutas
-  if (minutasCatFilter.parentElement) minutasCatFilter.parentElement.style.display = 'block'; // Mostrar filtros
+  minutasView.classList.remove('hidden');
+  minutasDocListContainer.style.display = 'block';
+  if (minutasCatFilter.parentElement) minutasCatFilter.parentElement.style.display = 'block';
 
-  searchBarContainer.classList.add('hidden');
+  searchBarContainer.classList.add('hidden'); // Barra de input se oculta
   document.body.classList.remove('search-bar-visible');
-  searchResultsBar.classList.add('hidden');
+  searchResultsBar.classList.add('hidden'); // Barra de resultados se oculta
   clearView();
   currentActiveContainer = null;
   docViewerTitleText.textContent = '';
@@ -428,7 +416,7 @@ function showMinutasListView() {
 }
 
 function loadMinutas() {
-  console.log("loadMinutas()"); // DEBUG
+  // console.log("loadMinutas()");
   const category = minutasCatFilter.value;
   const filteredMinutas = docsMinutas.filter(doc => category === 'all' || doc.category === category);
   populateDocList(minutasDocList, filteredMinutas, true);
@@ -437,9 +425,8 @@ function loadMinutas() {
 
 // --- INICIALIZACIÓN ---
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("DOMContentLoaded"); // DEBUG
-    // Llenar categorías de minutas
-    const minutasCategories = [...new Set(docsMinutas.map(m => m.category).filter(Boolean))].sort(); // filter(Boolean) para evitar undefined/null
+    // console.log("DOMContentLoaded");
+    const minutasCategories = [...new Set(docsMinutas.map(m => m.category).filter(Boolean))].sort();
     minutasCatFilter.innerHTML = '<option value="all">Todas las categorías</option>';
     minutasCategories.forEach(cat => {
         const option = document.createElement('option');
@@ -452,15 +439,14 @@ document.addEventListener('DOMContentLoaded', () => {
         showMinutasListView();
     } else {
         showHome();
-        if (docList) loadDocs(); // Solo cargar si docList existe
+        if (docList) loadDocs();
     }
     
     const savedView = localStorage.getItem('bibliotecaViewMode') || 'grid';
-    if (gridBtn && listBtn) { // Solo si los botones existen
+    if (gridBtn && listBtn) {
         changeViewMode(savedView);
         updateActiveButton(savedView === 'grid' ? gridBtn : listBtn, savedView === 'grid' ? listBtn : gridBtn);
     }
-
 
     const savedZoomIndex = parseInt(localStorage.getItem('bibliotecaZoomIndex'));
     if (!isNaN(savedZoomIndex) && savedZoomIndex >= 0 && savedZoomIndex < zoomLevels.length) {
@@ -473,8 +459,8 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 window.addEventListener('beforeunload', () => {
-    console.log("beforeunload - guardando preferencias"); // DEBUG
-    if (docList && docList.classList) { // Verificar que docList y classList existan
+    // console.log("beforeunload - guardando preferencias");
+    if (docList && docList.classList) {
         localStorage.setItem('bibliotecaViewMode', docList.classList.contains('doc-grid') ? 'grid' : 'list');
     }
     localStorage.setItem('bibliotecaZoomIndex', currentZoomIndex.toString());
