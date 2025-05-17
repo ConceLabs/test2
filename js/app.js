@@ -1,49 +1,53 @@
 // === ELEMENTOS DEL DOM ===
 const loadingSpinner = document.getElementById('loading-spinner');
-const appContainer = document.getElementById('app'); 
+// const appContainer = document.getElementById('app'); // No se usa directamente para zoom ahora
 
 const homeView = document.getElementById('home-view');
 const viewToolbar = document.getElementById('view-toolbar');
 const gridBtn = document.getElementById('grid-view-btn');
 const listBtn = document.getElementById('list-view-btn');
-const docListContainer = document.getElementById('docListContainer'); 
+const docListContainer = document.getElementById('docListContainer');
 const docList = document.getElementById('docList');
 
-const docToolbar = document.getElementById('doc-toolbar');
-const docViewerTitle = document.getElementById('doc-viewer-title'); 
-const btnBack = document.getElementById('btn-back');
+// Toolbar y elementos del visor de documentos
+const docViewerToolbar = document.getElementById('doc-viewer-toolbar'); // ID actualizado
+const docViewerTitleText = document.getElementById('doc-viewer-title-text'); // ID actualizado
+const btnBackToHome = document.getElementById('btn-back-to-home'); // ID actualizado
 const btnZoomIn = document.getElementById('btn-font-increase');
 const btnZoomOut = document.getElementById('btn-font-decrease');
 const viewer = document.getElementById('viewer');
 
+// Elementos de Minutas
 const minutasView = document.getElementById('minutas-view');
-const homeBtn = document.getElementById('home-btn');
+const homeBtnMinutas = document.getElementById('home-btn-minutas'); // ID actualizado
 const minutasCatFilter = document.getElementById('minutas-catFilter');
-const minutasDocListContainer = document.getElementById('minutasDocListContainer'); 
+const minutasDocListContainer = document.getElementById('minutasDocListContainer');
 const minutasDocList = document.getElementById('minutas-docList');
 const minutasViewer = document.getElementById('minutas-viewer');
 
-const toggleSearchBtn = document.getElementById('toggle-search');
-const searchBar = document.getElementById('search-bar');
-const searchInput = document.getElementById('search');
-const clearSearchBtnGlobal = document.getElementById('clear-search'); // El del HTML es #clear-search
+// Elementos de Búsqueda
+const toggleSearchBtnHeader = document.getElementById('toggle-search-btn-header'); // ID actualizado
+const searchBarContainer = document.getElementById('search-bar-container'); // ID actualizado
+const searchInputMain = document.getElementById('search-input-main'); // ID actualizado
+const clearSearchInputBtn = document.getElementById('clear-search-input-btn'); // ID actualizado
 
-const searchResults = document.getElementById('search-results');
-const resultCounter = document.getElementById('result-counter');
-const prevResult = document.getElementById('prev-result');
-const nextResult = document.getElementById('next-result');
-const closeSearchResultsBtn = document.getElementById('close-search-results'); 
+const searchResultsBar = document.getElementById('search-results-bar'); // ID actualizado
+const resultCounterSpan = document.getElementById('result-counter-span'); // ID actualizado
+const prevResultBtn = document.getElementById('prev-result-btn'); // ID actualizado
+const nextResultBtn = document.getElementById('next-result-btn'); // ID actualizado
+const closeSearchResultsBtnMain = document.getElementById('close-search-results-btn'); // ID actualizado
 
 let matches = [];
 let currentIndex = -1;
-let currentActiveContainer = null; 
-let currentDocumentTitle = ''; 
+let currentActiveContainer = null;
+let currentDocumentTitle = '';
 let markInstance = null;
 
 const zoomLevels = ['font-size-xs', 'font-size-s', 'font-size-m', 'font-size-l', 'font-size-xl'];
-let currentZoomIndex = 2; // Índice para 'font-size-m' (default)
+let currentZoomIndex = 2;
 
-// Documentos y Minutas (sin cambios, asumo que están correctos)
+// Documentos y Minutas (asumo que el contenido está bien)
+// ... (docs y docsMinutas arrays)
 const docs = [
   { file: 'docs/documento1.html', title: 'CÓDIGO PENAL', icon: 'fa-solid fa-gavel' },
   { file: 'docs/documento2.html', title: 'CÓDIGO PROCESAL PENAL', icon: 'fa-solid fa-scale-balanced' },
@@ -93,12 +97,11 @@ const docsMinutas = [
   { path: 'minutas/32_OTRA_MINUTA.md', title: 'N° 32 OTRA MINUTA Ejemplo', category: 'Categoría Ejemplo' }
 ];
 
-
 // --- Funciones Auxiliares ---
 function showLoading(show) { loadingSpinner.classList.toggle('hidden', !show); }
 function updateActiveButton(activeBtn, inactiveBtn) {
-  activeBtn.classList.add('active');
-  inactiveBtn.classList.remove('active');
+  if (activeBtn) activeBtn.classList.add('active');
+  if (inactiveBtn) inactiveBtn.classList.remove('active');
 }
 
 // --- Event Listeners ---
@@ -111,56 +114,57 @@ listBtn.addEventListener('click', () => {
   updateActiveButton(listBtn, gridBtn);
 });
 
-btnBack.addEventListener('click', showHome);
-homeBtn.addEventListener('click', showHome);
+btnBackToHome.addEventListener('click', showHome);
+homeBtnMinutas.addEventListener('click', showHome);
 
 btnZoomIn.addEventListener('click', () => changeGlobalZoom(1));
 btnZoomOut.addEventListener('click', () => changeGlobalZoom(-1));
 
-toggleSearchBtn.addEventListener('click', () => {
-  searchBar.classList.toggle('hidden');
-  if (!searchBar.classList.contains('hidden')) {
-    searchInput.focus();
-    // Si hay un documento abierto y texto en el input, re-ejecutar búsqueda
-    if (currentActiveContainer && searchInput.value.trim()) {
-        performSearch(searchInput.value.trim());
+toggleSearchBtnHeader.addEventListener('click', () => {
+  const isHidden = searchBarContainer.classList.toggle('hidden');
+  document.body.classList.toggle('search-bar-visible', !isHidden); // Clase en body para ajustar padding de #app
+  if (!isHidden) {
+    searchInputMain.focus();
+    if (currentActiveContainer && searchInputMain.value.trim()) {
+        performSearch(searchInputMain.value.trim());
     }
   } else {
-    // Si se oculta la barra, también ocultar los resultados
-    searchResults.classList.add('hidden');
-    // No limpiamos highlights aquí, se mantienen si el usuario solo cierra la barra
+    // Si se oculta la barra de búsqueda, también ocultar los resultados de búsqueda
+    searchResultsBar.classList.add('hidden');
   }
 });
 
-clearSearchBtnGlobal.addEventListener('click', () => {
-  searchInput.value = '';
-  clearSearchBtnGlobal.classList.add('hidden');
-  if (currentActiveContainer) { 
-      clearHighlights(); // Limpia los resaltados del documento
-      searchResults.classList.add('hidden'); // Oculta la barra de resultados
+clearSearchInputBtn.addEventListener('click', () => {
+  searchInputMain.value = '';
+  clearSearchInputBtn.classList.add('hidden');
+  if (currentActiveContainer) {
+      clearHighlights();
+      searchResultsBar.classList.add('hidden');
   }
-  searchInput.focus();
+  searchInputMain.focus();
 });
 
-closeSearchResultsBtn.addEventListener('click', () => {
-  // No limpiar el input, solo los resultados y highlights
+closeSearchResultsBtnMain.addEventListener('click', () => {
   clearHighlights();
-  searchResults.classList.add('hidden');
+  searchResultsBar.classList.add('hidden');
+  // Opcional: ¿Ocultar también la barra de búsqueda principal?
+  // searchBarContainer.classList.add('hidden');
+  // document.body.classList.remove('search-bar-visible');
 });
 
-prevResult.addEventListener('click', () => navigateResults(-1));
-nextResult.addEventListener('click', () => navigateResults(1));
+prevResultBtn.addEventListener('click', () => navigateResults(-1));
+nextResultBtn.addEventListener('click', () => navigateResults(1));
 
-searchInput.addEventListener('input', e => {
+searchInputMain.addEventListener('input', e => {
   const term = e.target.value.trim();
-  clearSearchBtnGlobal.classList.toggle('hidden', !term);
-  if (searchInput._timeout) clearTimeout(searchInput._timeout);
-  searchInput._timeout = setTimeout(() => {
-      if (currentActiveContainer && searchBar.offsetParent !== null) { // Solo buscar si hay visor y la barra de búsqueda está visible
+  clearSearchInputBtn.classList.toggle('hidden', !term);
+  if (searchInputMain._timeout) clearTimeout(searchInputMain._timeout);
+  searchInputMain._timeout = setTimeout(() => {
+      if (currentActiveContainer && !searchBarContainer.classList.contains('hidden')) {
           performSearch(term);
-      } else if (!term && currentActiveContainer) { // Si el término se borra
+      } else if (!term && currentActiveContainer) {
           clearHighlights();
-          searchResults.classList.add('hidden');
+          searchResultsBar.classList.add('hidden');
       }
   }, 300);
 });
@@ -170,8 +174,8 @@ minutasCatFilter.addEventListener('change', loadMinutas);
 // --- Lógica de Vistas y Navegación ---
 function changeViewMode(mode) {
   const isGrid = mode === 'grid';
-  docList.className = isGrid ? 'doc-grid' : 'doc-list'; // Reemplaza todas las clases por una sola
-  minutasDocList.className = isGrid ? 'doc-grid' : 'doc-list'; // También para minutas
+  docList.className = isGrid ? 'doc-grid' : 'doc-list';
+  minutasDocList.className = isGrid ? 'doc-grid' : 'doc-list';
 }
 
 function populateDocList(targetElement, documents, isMinutas = false) {
@@ -179,14 +183,13 @@ function populateDocList(targetElement, documents, isMinutas = false) {
     const fragment = document.createDocumentFragment();
     documents.forEach(doc => {
         const card = document.createElement('div');
-        card.className = 'doc-item'; // Clase base
+        card.className = 'doc-item';
         if (isMinutas) {
-            // Para minutas, el título y la categoría. El icono se podría añadir a docsMinutas si se quiere.
             card.innerHTML = `<div class="doc-title">${doc.title}</div><div class="doc-category">${doc.category}</div>`;
             card.addEventListener('click', () => openDoc(doc.path, doc.title));
         } else {
             card.innerHTML = `<div class="doc-icon"><i class="${doc.icon}"></i></div><div class="doc-title">${doc.title}</div>`;
-            card.addEventListener('click', () => doc.file === 'minutas' ? showMinutas() : openDoc(doc.file, doc.title));
+            card.addEventListener('click', () => doc.file === 'minutas' ? showMinutasView() : openDoc(doc.file, doc.title));
         }
         fragment.appendChild(card);
     });
@@ -196,51 +199,58 @@ function populateDocList(targetElement, documents, isMinutas = false) {
 function loadDocs() { populateDocList(docList, docs); }
 
 function showHome() {
-  homeView.style.display = 'flex'; 
-  minutasView.classList.add('hidden'); 
+  homeView.style.display = 'flex';
+  minutasView.classList.add('hidden');
   viewer.style.display = 'none';
-  docToolbar.classList.add('hidden');
+  docViewerToolbar.classList.add('hidden'); // Ocultar toolbar del visor
+
+  searchBarContainer.classList.add('hidden'); // Ocultar barra de búsqueda
+  document.body.classList.remove('search-bar-visible');
+  searchResultsBar.classList.add('hidden'); // Ocultar resultados
   
-  searchBar.classList.add('hidden'); // Ocultar barra de búsqueda al ir a home
-  searchResults.classList.add('hidden'); 
-  clearView(); 
+  clearView();
   currentActiveContainer = null;
-  docViewerTitle.textContent = ''; 
+  docViewerTitleText.textContent = '';
   document.title = 'Biblioteca Jurídica – ANF';
+  toggleSearchBtnHeader.style.display = 'block'; // Asegurar que el botón de búsqueda del header esté visible
 }
 
 function clearView() {
   viewer.innerHTML = '';
   minutasViewer.innerHTML = '';
-  clearHighlights(); // Asegurar que los highlights se limpien
+  clearHighlights();
 }
 
 async function openDoc(path, title) {
   showLoading(true);
-  clearView(); // Limpia visores y cualquier resaltado anterior
+  clearView();
   homeView.style.display = 'none';
   minutasView.classList.add('hidden');
-  docToolbar.classList.remove('hidden');
-  docViewerTitle.textContent = title; 
+  docViewerToolbar.classList.remove('hidden'); // Mostrar toolbar del visor
+  docViewerTitleText.textContent = title;
   currentDocumentTitle = title;
 
-  // La searchBar se controla con su propio botón toggleSearchBtn, no se muestra/oculta aquí.
-  // Pero sí ocultamos los resultados de una búsqueda anterior.
-  searchResults.classList.add('hidden');
+  // La barra de búsqueda se controla con toggleSearchBtnHeader, no se muestra automáticamente aquí
+  // Pero si estaba visible, podría quedarse. O la ocultamos explícitamente:
+  // searchBarContainer.classList.add('hidden');
+  // document.body.classList.remove('search-bar-visible');
+  searchResultsBar.classList.add('hidden'); // Ocultar resultados de búsqueda anteriores
 
   let targetViewer;
   if (path.startsWith('minutas/')) {
-    minutasView.classList.remove('hidden'); 
-    minutasDocListContainer.style.display = 'none'; 
-    minutasCatFilter.parentElement.style.display = 'none'; 
+    minutasView.classList.remove('hidden');
+    minutasDocListContainer.style.display = 'none';
+    if(minutasCatFilter.parentElement) minutasCatFilter.parentElement.style.display = 'none';
     minutasViewer.style.display = 'block';
     targetViewer = minutasViewer;
+    // Al abrir una minuta individual, ocultar botón de búsqueda del header si se quiere.
+    // toggleSearchBtnHeader.style.display = 'none';
   } else {
     viewer.style.display = 'block';
     targetViewer = viewer;
+    // toggleSearchBtnHeader.style.display = 'block'; // Asegurar que el botón de búsqueda esté para docs normales
   }
   currentActiveContainer = targetViewer;
-  // El zoom global se aplica al body, así que el nuevo contenido lo respetará.
 
   try {
     const response = await fetch(path);
@@ -250,24 +260,20 @@ async function openDoc(path, title) {
     if (path.endsWith('.html')) {
       targetViewer.innerHTML = content;
     } else if (path.endsWith('.md')) {
-      // Usar { sanitize: false } si confías en el contenido de tus MD.
-      // Si no, marked.parse sanitizará por defecto, lo que puede quitar algunos estilos o scripts.
-      // Para una biblioteca interna, sanitize: false suele ser seguro.
-      targetViewer.innerHTML = marked.parse(content, { breaks: true }); // breaks:true para saltos de línea tipo GFM
+      targetViewer.innerHTML = marked.parse(content, { breaks: true, gfm: true });
     } else {
-      targetViewer.innerHTML = `<pre>${content}</pre>`; 
+      targetViewer.innerHTML = `<pre>${content}</pre>`;
     }
     
-    if (path.endsWith('.html')) { // Re-aplicar highlight.js para código en HTML
+    if (typeof hljs !== 'undefined' && path.endsWith('.html')) {
         targetViewer.querySelectorAll('pre code').forEach((block) => {
             hljs.highlightElement(block);
         });
     }
     document.title = `${title} – Biblioteca Jurídica`;
 
-    // Si la barra de búsqueda está visible y hay texto, realizar búsqueda
-    if (searchInput.value.trim() && !searchBar.classList.contains('hidden')) {
-        performSearch(searchInput.value.trim());
+    if (searchInputMain.value.trim() && !searchBarContainer.classList.contains('hidden')) {
+        performSearch(searchInputMain.value.trim());
     }
 
   } catch (err) {
@@ -275,7 +281,7 @@ async function openDoc(path, title) {
     console.error("Error fetching document:", path, err);
   } finally {
     showLoading(false);
-    if (targetViewer) targetViewer.scrollTop = 0; 
+    if (targetViewer) targetViewer.scrollTop = 0;
   }
 }
 
@@ -283,6 +289,7 @@ async function openDoc(path, title) {
 function applyGlobalZoom() {
   zoomLevels.forEach(level => document.body.classList.remove(level));
   document.body.classList.add(zoomLevels[currentZoomIndex]);
+  console.log("Zoom aplicado:", zoomLevels[currentZoomIndex]); // Para depuración
 }
 function changeGlobalZoom(delta) {
   const newZoomIndex = currentZoomIndex + delta;
@@ -296,47 +303,45 @@ function changeGlobalZoom(delta) {
 function clearHighlights() {
   if (markInstance) {
     markInstance.unmark();
-    markInstance = null; 
+    markInstance = null;
   }
   matches = [];
   currentIndex = -1;
-  // No ocultar searchResults aquí, se gestiona en performSearch o al cerrar la barra/resultados
-  updateResultsUI(); // Actualiza el contador a "0 de 0" o similar
+  updateResultsUI();
 }
 
 function performSearch(term) {
   if (!currentActiveContainer) {
-    searchResults.classList.add('hidden');
+    searchResultsBar.classList.add('hidden');
     return;
   }
-  clearHighlights(); // Limpia resaltados anteriores antes de una nueva búsqueda
+  clearHighlights();
 
-  if (!term) { // Si el término está vacío, no hay nada que buscar
-    searchResults.classList.add('hidden');
+  if (!term) {
+    searchResultsBar.classList.add('hidden');
     return;
   }
 
   markInstance = new Mark(currentActiveContainer);
   markInstance.mark(term, {
-    separateWordSearch: false, 
-    className: 'highlighted-match', 
-    accuracy: "partially", // Permite coincidencias parciales
-    wildcards: "disabled", // O "enabled" si quieres usar * como comodín
-    ignoreJoiners: true, // Ignora guiones, etc. para unir palabras
-    done: (count) => {
-      matches = Array.from(currentActiveContainer.querySelectorAll('mark.highlighted-match')); // Seleccionar solo los nuestros
+    separateWordSearch: false,
+    className: 'highlighted-match',
+    accuracy: "partially",
+    ignoreJoiners: true,
+    done: (count)_ => { // Renombrar count a _ si no se usa para evitar linting errors
+      matches = Array.from(currentActiveContainer.querySelectorAll('mark.highlighted-match'));
       if (matches.length > 0) {
         currentIndex = 0;
         scrollToMatch();
-        searchResults.classList.remove('hidden'); // Mostrar resultados
+        searchResultsBar.classList.remove('hidden');
       } else {
-        searchResults.classList.add('hidden'); // Ocultar si no hay resultados
+        searchResultsBar.classList.add('hidden');
       }
       updateResultsUI();
     },
-    noMatch: (term) => {
-        searchResults.classList.add('hidden');
-        updateResultsUI(); // Asegurar que el contador se actualice
+    noMatch: (_) => { // Renombrar term a _
+        searchResultsBar.classList.add('hidden');
+        updateResultsUI();
     }
   });
 }
@@ -344,12 +349,11 @@ function performSearch(term) {
 function scrollToMatch() {
   if (!matches.length || currentIndex < 0 || currentIndex >= matches.length) return;
   
-  // Quitar clase 'current-match' de cualquier match anterior
   const prevCurrent = currentActiveContainer.querySelector('mark.current-match');
   if (prevCurrent) prevCurrent.classList.remove('current-match');
   
   const currentMatchElement = matches[currentIndex];
-  currentMatchElement.classList.add('current-match'); // Añadir clase al match actual
+  currentMatchElement.classList.add('current-match');
   currentMatchElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
@@ -361,79 +365,76 @@ function navigateResults(direction) {
 }
 
 function updateResultsUI() {
-  if (matches.length > 0) {
-    resultCounter.textContent = `${currentIndex + 1} de ${matches.length}`;
+  if (matches.length > 0 && !searchResultsBar.classList.contains('hidden')) {
+    resultCounterSpan.textContent = `${currentIndex + 1} de ${matches.length}`;
   } else {
-    // Si hay un término de búsqueda pero no resultados.
-    resultCounter.textContent = searchInput.value.trim() ? '0 resultados' : '';
+    resultCounterSpan.textContent = searchInputMain.value.trim() ? '0 resultados' : '';
   }
 }
 
 // --- Funciones de Minutas ---
-function showMinutas() {
+function showMinutasView() { // Renombrada para evitar conflicto con variable minutasView
   homeView.style.display = 'none';
   viewer.style.display = 'none';
-  docToolbar.classList.add('hidden');
+  docViewerToolbar.classList.add('hidden');
   
   minutasView.classList.remove('hidden');
-  minutasDocListContainer.style.display = 'block'; 
-  minutasCatFilter.parentElement.style.display = 'block'; 
-  minutasViewer.style.display = 'none'; 
+  minutasDocListContainer.style.display = 'block';
+  if(minutasCatFilter.parentElement) minutasCatFilter.parentElement.style.display = 'block';
+  minutasViewer.style.display = 'none';
 
-  searchBar.classList.add('hidden'); // Ocultar barra de búsqueda en vista de minutas (lista)
-  searchResults.classList.add('hidden'); 
+  searchBarContainer.classList.add('hidden');
+  document.body.classList.remove('search-bar-visible');
+  searchResultsBar.classList.add('hidden');
   clearView();
   currentActiveContainer = null;
-  docViewerTitle.textContent = '';
+  docViewerTitleText.textContent = '';
   document.title = 'Minutas Jurisprudencia – Biblioteca Jurídica';
-  loadMinutas(); 
+  toggleSearchBtnHeader.style.display = 'block'; // Botón de búsqueda general visible aquí
+  loadMinutas();
 }
 
 function loadMinutas() {
   const category = minutasCatFilter.value;
   const filteredMinutas = docsMinutas.filter(doc => category === 'all' || doc.category === category);
   populateDocList(minutasDocList, filteredMinutas, true);
-  if (minutasDocListContainer) minutasDocListContainer.scrollTop = 0; 
+  if (minutasDocListContainer) minutasDocListContainer.scrollTop = 0;
 }
 
 // --- Inicialización ---
 document.addEventListener('DOMContentLoaded', () => {
+    // Llenar categorías de minutas
     const minutasCategories = [...new Set(docsMinutas.map(m => m.category))].sort();
+    minutasCatFilter.innerHTML = '<option value="all">Todas las categorías</option>'; // Resetear
     minutasCategories.forEach(cat => {
-        if (!Array.from(minutasCatFilter.options).find(opt => opt.value === cat)) {
-            const option = document.createElement('option');
-            option.value = cat;
-            option.textContent = cat;
-            minutasCatFilter.appendChild(option);
-        }
+        const option = document.createElement('option');
+        option.value = cat;
+        option.textContent = cat;
+        minutasCatFilter.appendChild(option);
     });
     
+    // Manejar hash para shortcuts y estado inicial
     if (window.location.hash === '#minutas') {
-        showMinutas();
+        showMinutasView();
     } else {
-        showHome(); // Iniciar en Home por defecto si no hay hash
-        loadDocs(); 
+        showHome();
+        loadDocs();
     }
     
-    // Establecer vista por defecto y aplicar zoom inicial
-    // Leer desde localStorage si se guardó la preferencia de vista
     const savedView = localStorage.getItem('bibliotecaViewMode') || 'grid';
     changeViewMode(savedView);
     updateActiveButton(savedView === 'grid' ? gridBtn : listBtn, savedView === 'grid' ? listBtn : gridBtn);
 
-    // Leer desde localStorage el nivel de zoom
     const savedZoomIndex = parseInt(localStorage.getItem('bibliotecaZoomIndex'));
     if (!isNaN(savedZoomIndex) && savedZoomIndex >= 0 && savedZoomIndex < zoomLevels.length) {
         currentZoomIndex = savedZoomIndex;
     }
-    applyGlobalZoom();
+    applyGlobalZoom(); // Aplicar zoom al inicio
 
-    // Inicialmente el botón de limpiar búsqueda está oculto
-    clearSearchBtnGlobal.classList.add('hidden');
-    searchResults.classList.add('hidden'); // Asegurarse que esté oculto al inicio
+    clearSearchInputBtn.classList.add('hidden');
+    searchResultsBar.classList.add('hidden');
 });
 
-// Guardar preferencias en localStorage
 window.addEventListener('beforeunload', () => {
     localStorage.setItem('bibliotecaViewMode', docList.classList.contains('doc-grid') ? 'grid' : 'list');
     localStorage.setItem('bibliotecaZoomIndex', currentZoomIndex.toString());
