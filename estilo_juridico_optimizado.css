@@ -50,32 +50,42 @@ body.search-bar-visible #app {
     padding-top: calc(var(--header-height) + var(--search-bar-height));
 }
 
-#home-view, #minutas-view, .viewer-container {
+#home-view, #minutas-view { /* Contenedores de vista principal */
   flex-grow: 1;
-  overflow-y: auto;
+  overflow-y: auto; /* Habilitar scroll para el contenido de estas vistas */
   -webkit-overflow-scrolling: touch;
-}
-#home-view, #minutas-view {
   display: flex; flex-direction: column;
   position: relative; 
 }
-
-.doc-list-container {
+/* El visor de documentos tiene su propio scroll manejado por .viewer-container */
+.viewer-container {
   flex-grow: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  /* Otros estilos para .viewer-container se definen más abajo */
+}
+
+
+.doc-list-container { /* Contenedor para las listas de documentos */
+  flex-grow: 1;
+  /* No necesita overflow-y si el padre (#home-view/#minutas-view) ya lo tiene */
   padding: 0.75rem;
 }
 
 .viewer-container, 
 #viewer, 
 #minutas-viewer {
-  display: none;
+  display: none; /* Controlado por JS */
+  /* flex-grow y overflow-y ya están en .viewer-container arriba */
   padding: 1rem 1.25rem; 
   background: #fff; line-height: 1.7; text-align: justify;
+  position: relative; /* Para que z-index de hijos sea relativo a él si es necesario */
 }
 .viewer-container h1, .viewer-container h2, .viewer-container h3, .viewer-container h4, .viewer-container h5, .viewer-container h6, 
-.viewer-container p, .viewer-container li, .viewer-container span, .viewer-container div, .viewer-container pre, .viewer-container code {
-    font-size: inherit !important; /* Forzar herencia del zoom para todos los elementos de texto comunes */
-    line-height: inherit !important; /* También heredar line-height si el zoom lo afecta */
+.viewer-container p, .viewer-container li, .viewer-container span, .viewer-container div, .viewer-container pre, .viewer-container code,
+.viewer-container table, .viewer-container td, .viewer-container th, .viewer-container strong, .viewer-container em {
+    font-size: inherit !important;
+    line-height: inherit !important;
 }
 
 
@@ -85,7 +95,7 @@ header.main-header {
   height: var(--header-height); display: flex; align-items: center;
   position: fixed;
   top: 0; left: 0; right: 0;
-  z-index: 200; 
+  z-index: 300; /* MÁS ALTO */
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 header.main-header .title-bar {
@@ -99,57 +109,45 @@ header.main-header .title-bar h1 {
   overflow: hidden; text-overflow: ellipsis;
 }
 #toggle-search-btn-header {
-    color: #fff;
-    opacity: 0.9; 
-    margin-left: 0.5rem;
-    /* Asegurar que es un botón de icono si no tiene la clase btn-icon explícitamente */
-    width: 36px;
-    height: 36px;
-    padding: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    color: #fff; opacity: 0.9; margin-left: 0.5rem;
+    width: 36px; height: 36px; padding: 0;
+    display: flex; align-items: center; justify-content: center;
 }
-#toggle-search-btn-header:hover {
-    background: rgba(255,255,255,0.1);
-    opacity: 1;
-}
+#toggle-search-btn-header:hover { background: rgba(255,255,255,0.1); opacity: 1; }
 
 .search-bar-container {
   background: var(--bg); 
-  padding: 0.5rem 1rem;
-  height: var(--search-bar-height);
+  padding: 0.5rem 1rem; height: var(--search-bar-height);
   display: flex; align-items: center;
   box-shadow: inset 0 -1px 3px rgba(0,0,0,0.05);
   position: fixed;
   top: var(--header-height); left: 0; right: 0;
-  z-index: 190;
+  z-index: 290; /* DEBAJO DEL HEADER */
   transition: transform 0.3s ease-out;
 }
-.search-bar-container.hidden {
-  transform: translateY(-100%);
-}
+.search-bar-container.hidden { transform: translateY(-100%); }
 .search-bar-container .search-bar-icon { color: var(--text-light); margin-right: 0.5rem; }
 .search-bar-container input {
   flex: 1; border: none; background: transparent;
   padding: .25rem 0; font-size: 0.9rem; outline: none; color: var(--text);
 }
 .search-bar-container input::placeholder { color: var(--text-light); }
-.search-bar-container .clear-btn {
-   font-size: 1rem;
-}
+.search-bar-container .clear-btn { font-size: 1rem; }
 
 /* --- Toolbars de Vista y Documento --- */
-.toolbar {
+.toolbar { /* Estilo base para #view-toolbar y #doc-viewer-toolbar */
   display: flex; align-items: center; justify-content: space-between;
   background: var(--card-bg); padding: .25rem .75rem;
   border-bottom: 1px solid #e0e0e0; height: var(--toolbar-height);
   box-sizing: border-box;
 }
-#doc-viewer-toolbar {
-    position: sticky;
+#doc-viewer-toolbar { /* Toolbar específica del visor de documentos */
+    position: sticky; /* Se pega arriba DENTRO de su contenedor scrolleable (#app) */
     top: 0; 
-    z-index: 150;
+    /* Si search-bar-container está visible, #app tiene padding-top aumentado, 
+       por lo que este top:0 se referirá a la parte de abajo de la search-bar-container. */
+    z-index: 200; /* Encima del contenido del visor, pero debajo de search-bar y header */
+    background: var(--card-bg); /* Para que no sea transparente */
 }
 
 .toolbar .doc-viewer-title {
@@ -159,18 +157,12 @@ header.main-header .title-bar h1 {
 }
 .btn {
   background: transparent; border: 1px solid transparent; 
-  border-radius: var(--radius);
-  min-width: 36px;
-  height: 36px; 
-  padding: 0 0.5rem;
-  display: flex; align-items: center; justify-content: center;
+  border-radius: var(--radius); min-width: 36px; height: 36px; 
+  padding: 0 0.5rem; display: flex; align-items: center; justify-content: center;
   color: var(--primary); cursor: pointer;
   transition: background-color 0.2s ease, color 0.2s ease;
 }
-.btn.btn-icon {
-    width: 36px;
-    padding: 0;
-}
+.btn.btn-icon { width: 36px; padding: 0; }
 .btn:hover { background: rgba(31, 51, 77, 0.08); }
 .btn.active { background: var(--primary); color: #fff; }
 .btn:focus-visible { outline: 2px solid var(--secondary); outline-offset: 1px; }
@@ -181,7 +173,7 @@ header.main-header .title-bar h1 {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); 
   gap: 0.75rem; 
-  padding-bottom: calc(var(--toolbar-height) + 1rem); /* Espacio para la barra de resultados si está fija abajo */
+  padding-bottom: calc(var(--toolbar-height) + 1rem); 
 }
 .doc-item {
   background: var(--card-bg); border-radius: var(--radius);
@@ -191,88 +183,47 @@ header.main-header .title-bar h1 {
   flex-direction: column; justify-content: center; align-items: center;
   padding: 0.5rem; overflow: hidden; position: relative;
 }
-.doc-item:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-hover);
-}
-.doc-icon {
-  font-size: 1.8rem;
-  color: var(--primary);
-  margin-bottom: 0.4rem;
-}
+.doc-item:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); }
+.doc-icon { font-size: 1.8rem; color: var(--primary); margin-bottom: 0.4rem; }
 .doc-title {
-  font-weight: 500; /* Puedes probar 600 si quieres más énfasis */
-  font-size: .78rem; 
-  line-height: 1.3;
-  color: var(--text);
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-height: calc(0.78rem * 1.3 * 3);
+  font-weight: 500; font-size: .78rem; line-height: 1.3; color: var(--text);
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+  overflow: hidden; text-overflow: ellipsis; max-height: calc(0.78rem * 1.3 * 3);
 }
 
-/* Tarjetas en Vista de Lista - MÁS COMPACTAS */
 .doc-list .doc-item {
-  aspect-ratio: auto;
-  flex-direction: row;
-  justify-content: flex-start;
-  align-items: center;
-  padding: 0.45rem 0.75rem; 
-  text-align: left;
-  gap: 0.6rem; 
+  aspect-ratio: auto; flex-direction: row; justify-content: flex-start;
+  align-items: center; padding: 0.45rem 0.75rem; text-align: left; gap: 0.6rem; 
 }
-.doc-list .doc-item .doc-icon {
-  font-size: 1.3rem; 
-  margin-bottom: 0;
-  flex-shrink: 0; 
-}
+.doc-list .doc-item .doc-icon { font-size: 1.3rem; margin-bottom: 0; flex-shrink: 0; }
 .doc-list .doc-item .doc-title {
-  font-size: 0.82rem; 
-  font-weight: 500;
-  line-height: 1.25; 
-  flex-grow: 1;
-  -webkit-line-clamp: 2;
-  max-height: calc(0.82rem * 1.25 * 2);
+  font-size: 0.82rem; font-weight: 500; line-height: 1.25; flex-grow: 1;
+  -webkit-line-clamp: 2; max-height: calc(0.82rem * 1.25 * 2);
 }
 .doc-list .doc-item .doc-category {
-    font-size: 0.65rem; 
-    color: var(--text-light);
-    margin-left: auto; 
-    padding-left: 0.4rem;
-    white-space: nowrap;
-    flex-shrink: 0; 
+    font-size: 0.65rem; color: var(--text-light); margin-left: auto; 
+    padding-left: 0.4rem; white-space: nowrap; flex-shrink: 0; 
 }
 
-.doc-category { /* Categoría en tarjetas grid de minutas */
+.doc-category {
   font-size: 0.65rem; color: var(--text-light);
-  background-color: var(--bg); padding: 0.15em 0.4em;
-  border-radius: 4px;
-  position: absolute;
-  bottom: 6px; 
-  left: 50%;
-  transform: translateX(-50%);
-  max-width: calc(100% - 12px); 
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  background-color: var(--bg); padding: 0.15em 0.4em; border-radius: 4px;
+  position: absolute; bottom: 6px; left: 50%; transform: translateX(-50%);
+  max-width: calc(100% - 12px); white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis;
 }
-#minutas-docList.doc-grid .doc-item .doc-title { /* Ajuste título en minutas grid */
-    -webkit-line-clamp: 2; /* Dejar más espacio para la categoría visible abajo */
-     max-height: calc(0.78rem * 1.3 * 2);
-     margin-bottom: 1.5rem; /* Espacio para la categoría que está position:absolute */
+#minutas-docList.doc-grid .doc-item .doc-title {
+    -webkit-line-clamp: 2; max-height: calc(0.78rem * 1.3 * 2);
+     margin-bottom: 1.5rem; 
 }
-
 
 /* --- Minutas --- */
 #minutas-view .minutas-header { 
   background: var(--primary); color: #fff; display: flex;
   align-items: center; justify-content: space-between;
-  padding: 0 1rem; height: var(--header-height); /* Mismo alto que el header principal */
+  padding: 0 1rem; height: var(--header-height);
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  /* Si esta vista tiene su propio header, y el main-header es fixed, ajustar posición */
-  /* position: sticky; top: var(--header-height);  // Si el main-header es fixed */
+  /* Este header es parte del contenido scrolleable de #minutas-view, no necesita ser fixed/sticky */
 }
 #minutas-view .minutas-header h1 {
   font-family: var(--font-heading, var(--font-body)); font-size: 1.05rem;
@@ -301,49 +252,28 @@ header.main-header .title-bar h1 {
 
 /* --- Barra de Resultados de Búsqueda --- */
 .search-results-bar {
-  position: fixed; 
-  bottom: 0;
-  left: 0; right: 0;
-  background: var(--primary-light);
-  color: #fff;
-  padding: 0.35rem 0.75rem; 
-  display: flex; align-items: center; justify-content: space-between;
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: var(--primary-light); color: #fff;
+  padding: 0.35rem 0.75rem; display: flex; align-items: center; justify-content: space-between;
   box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
-  z-index: 250;
-  height: var(--toolbar-height);
-  box-sizing: border-box;
+  z-index: 250; /* Encima del contenido del visor y su toolbar, pero debajo del header principal y search-bar */
+  height: var(--toolbar-height); box-sizing: border-box;
   transition: transform 0.3s ease-out;
 }
-.search-results-bar.hidden {
-  transform: translateY(100%);
-}
-.search-results-bar > * {
-    flex-shrink: 0;
-}
+.search-results-bar.hidden { transform: translateY(100%); }
+.search-results-bar > * { flex-shrink: 0; }
 .search-results-bar #result-counter-span {
-  font-size: 0.85rem;
-  text-align: center;
-  flex-grow: 1;
+  font-size: 0.85rem; text-align: center; flex-grow: 1;
 }
-.search-results-bar .btn {
-    color: #fff;
-}
-.search-results-bar .btn:hover {
-    background: rgba(255,255,255,0.1);
-}
+.search-results-bar .btn { color: #fff; }
+.search-results-bar .btn:hover { background: rgba(255,255,255,0.1); }
 
 /* Estilos para el texto resaltado por Mark.js */
 mark.highlighted-match {
-  background-color: #ffe066;
-  color: #333;
-  padding: 0.1em 0;
-  border-radius: 3px;
-  box-shadow: 0 0 0 1px #ffe066;
+  background-color: #ffe066; color: #333; padding: 0.1em 0;
+  border-radius: 3px; box-shadow: 0 0 0 1px #ffe066;
 }
-mark.current-match {
-  background-color: #ff9933;
-  box-shadow: 0 0 0 2px #ff9933;
-}
+mark.current-match { background-color: #ff9933; box-shadow: 0 0 0 2px #ff9933; }
 
 /* Global Font Size Control (para Zoom) */
 body.font-size-xs { font-size: 13.5px; }
@@ -353,11 +283,8 @@ body.font-size-l  { font-size: 18px; }
 body.font-size-xl { font-size: 20px; }
 
 /* Responsive adjustments */
-@media (max-width: 360px) { /* Para pantallas muy pequeñas */
-  .doc-grid {
-    grid-template-columns: repeat(auto-fill, minmax(95px, 1fr)); /* Aún más pequeñas si es necesario */
-    gap: 0.5rem;
-  }
+@media (max-width: 360px) {
+  .doc-grid { grid-template-columns: repeat(auto-fill, minmax(95px, 1fr)); gap: 0.5rem; }
   .doc-icon { font-size: 1.5rem; }
   .doc-title { font-size: .7rem; -webkit-line-clamp: 2; max-height: calc(0.7rem * 1.25 * 2); }
   header.main-header .title-bar h1 { font-size: 0.95rem; }
