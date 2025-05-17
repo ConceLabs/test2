@@ -118,13 +118,22 @@ btnZoomOut.addEventListener('click', () => changeGlobalZoom(-1));
 toggleSearchBtnHeader.addEventListener('click', () => {
   const isNowHidden = searchBarContainer.classList.toggle('hidden');
   document.body.classList.toggle('search-bar-visible', !isNowHidden);
-  if (!isNowHidden) {
+  
+  if (!isNowHidden) { 
     searchInputMain.focus();
     if (currentActiveContainer && searchInputMain.value.trim()) {
         performSearch(searchInputMain.value.trim());
     }
+  } else { 
+    searchResultsBar.classList.add('hidden'); 
+  }
+
+  if (currentActiveContainer) {
+    docViewerToolbar.classList.remove('hidden');
+    // console.log("toggleSearchBtnHeader: docViewerToolbar forzada a visible (si hay currentActiveContainer)");
   } else {
-    searchResultsBar.classList.add('hidden');
+    docViewerToolbar.classList.add('hidden');
+    // console.log("toggleSearchBtnHeader: docViewerToolbar forzada a oculta (NO hay currentActiveContainer)");
   }
 });
 
@@ -200,14 +209,14 @@ function showHome() {
   minutasView.classList.add('hidden');
   viewer.style.display = 'none';
   minutasViewer.style.display = 'none';
-  docViewerToolbar.classList.add('hidden'); // Toolbar del visor se oculta
+  docViewerToolbar.classList.add('hidden'); 
 
-  searchBarContainer.classList.add('hidden'); // Barra de input de búsqueda se oculta
+  searchBarContainer.classList.add('hidden'); 
   document.body.classList.remove('search-bar-visible');
-  searchResultsBar.classList.add('hidden'); // Barra de resultados se oculta
+  searchResultsBar.classList.add('hidden'); 
   
   clearView();
-  currentActiveContainer = null;
+  currentActiveContainer = null; 
   docViewerTitleText.textContent = '';
   document.title = 'Biblioteca Jurídica – ANF';
   if (toggleSearchBtnHeader) toggleSearchBtnHeader.style.display = 'block';
@@ -223,33 +232,29 @@ function clearView() {
 async function openDoc(path, title) {
   // console.log(`openDoc() llamado con path: ${path}, title: ${title}`);
   showLoading(true);
-  clearView();
+  clearView(); 
   
-  homeView.style.display = 'none';
-  docViewerToolbar.classList.remove('hidden'); // Toolbar del visor se muestra
+  homeView.style.display = 'none'; 
+  docViewerToolbar.classList.remove('hidden'); 
+  // console.log("openDoc: docViewerToolbar.classList.remove('hidden') llamado");
+
   docViewerTitleText.textContent = title;
   currentDocumentTitle = title;
   searchResultsBar.classList.add('hidden');
 
   let targetViewer;
   if (path.startsWith('minutas/')) {
-    // console.log("Abriendo minuta...");
     minutasView.classList.remove('hidden'); 
     minutasDocListContainer.style.display = 'none'; 
     if (minutasCatFilter.parentElement) minutasCatFilter.parentElement.style.display = 'none';
-    
     viewer.style.display = 'none'; 
     minutasViewer.style.display = 'block'; 
     targetViewer = minutasViewer;
-    if (toggleSearchBtnHeader) toggleSearchBtnHeader.style.display = 'block';
   } else {
-    // console.log("Abriendo documento normal...");
     minutasView.classList.add('hidden'); 
     minutasViewer.style.display = 'none'; 
-
     viewer.style.display = 'block'; 
     targetViewer = viewer;
-    if (toggleSearchBtnHeader) toggleSearchBtnHeader.style.display = 'block';
   }
 
   if (!targetViewer) {
@@ -257,15 +262,12 @@ async function openDoc(path, title) {
       showLoading(false);
       return;
   }
-  currentActiveContainer = targetViewer;
-  // console.log("currentActiveContainer es:", currentActiveContainer ? currentActiveContainer.id : "null");
+  currentActiveContainer = targetViewer; 
 
   try {
     const response = await fetch(path);
-    // console.log(`Fetch response for ${path}: status ${response.status}, ok: ${response.ok}`);
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status} for ${path}`);
     const content = await response.text();
-    // console.log(`Contenido cargado para ${path} (primeros 100 chars):`, content.substring(0, 100));
     
     if (path.endsWith('.html')) {
       targetViewer.innerHTML = content;
@@ -285,7 +287,6 @@ async function openDoc(path, title) {
     if (searchInputMain.value.trim() && !searchBarContainer.classList.contains('hidden')) {
         performSearch(searchInputMain.value.trim());
     }
-
   } catch (err) {
     console.error("Error en openDoc al cargar contenido:", err);
     if (targetViewer) {
@@ -294,7 +295,6 @@ async function openDoc(path, title) {
   } finally {
     showLoading(false);
     if (targetViewer) targetViewer.scrollTop = 0;
-    // console.log("openDoc() finalizado. Estado de visores:", "viewer.display:", viewer.style.display, "minutasViewer.display:", minutasViewer.style.display);
   }
 }
 
@@ -327,15 +327,17 @@ function clearHighlights() {
 function performSearch(term) {
   // console.log(`performSearch("${term}")`);
   if (!currentActiveContainer) {
-    // console.log("performSearch: No hay currentActiveContainer");
     searchResultsBar.classList.add('hidden');
     return;
   }
   clearHighlights();
 
   if (!term) {
-    // console.log("performSearch: Término vacío");
     searchResultsBar.classList.add('hidden');
+    if (currentActiveContainer) { // Asegurar que la toolbar del visor NO se oculte
+        docViewerToolbar.classList.remove('hidden');
+        // console.log("performSearch (término vacío): docViewerToolbar forzada a visible");
+    }
     return;
   }
 
@@ -349,16 +351,24 @@ function performSearch(term) {
       if (matches.length > 0) {
         currentIndex = 0;
         scrollToMatch();
-        searchResultsBar.classList.remove('hidden'); // Mostrar barra de resultados
+        searchResultsBar.classList.remove('hidden');
       } else {
-        searchResultsBar.classList.add('hidden'); // Ocultar si no hay resultados
+        searchResultsBar.classList.add('hidden');
       }
       updateResultsUI();
+      if (currentActiveContainer) { // Asegurar que la toolbar del visor esté visible
+        docViewerToolbar.classList.remove('hidden');
+        // console.log("performSearch (done): docViewerToolbar forzada a visible");
+      }
     },
     noMatch: (_term) => {
         // console.log("Búsqueda sin resultados para:", _term);
         searchResultsBar.classList.add('hidden');
         updateResultsUI();
+        if (currentActiveContainer) { // Asegurar que la toolbar del visor esté visible
+            docViewerToolbar.classList.remove('hidden');
+            // console.log("performSearch (noMatch): docViewerToolbar forzada a visible");
+        }
     }
   });
 }
@@ -398,15 +408,15 @@ function showMinutasListView() {
   homeView.style.display = 'none';
   viewer.style.display = 'none';
   minutasViewer.style.display = 'none';
-  docViewerToolbar.classList.add('hidden'); // Toolbar del visor se oculta
+  docViewerToolbar.classList.add('hidden'); 
   
   minutasView.classList.remove('hidden');
   minutasDocListContainer.style.display = 'block';
   if (minutasCatFilter.parentElement) minutasCatFilter.parentElement.style.display = 'block';
 
-  searchBarContainer.classList.add('hidden'); // Barra de input se oculta
+  searchBarContainer.classList.add('hidden'); 
   document.body.classList.remove('search-bar-visible');
-  searchResultsBar.classList.add('hidden'); // Barra de resultados se oculta
+  searchResultsBar.classList.add('hidden'); 
   clearView();
   currentActiveContainer = null;
   docViewerTitleText.textContent = '';
