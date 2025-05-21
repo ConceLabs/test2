@@ -166,6 +166,14 @@ searchInputMain.addEventListener('input', e => {
           clearHighlights();
           searchResultsBar.classList.add('hidden');
       }
+
+      if (currentActiveContainer && !docViewerToolbar.classList.contains('hidden') && searchBarContainer.classList.contains('hidden')) {
+          // This case should ideally not happen if search bar is hidden, but as a safeguard
+          // if a search term was entered, then search bar hidden quickly.
+      } else if (currentActiveContainer) {
+          docViewerToolbar.classList.remove('hidden');
+          // console.log("searchInputMain input: docViewerToolbar forced visible if currentActiveContainer");
+      }
   }, 300);
 });
 
