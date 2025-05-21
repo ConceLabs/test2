@@ -149,6 +149,15 @@ function resetToolbarStyles(toolbarElement, context) {
     }, 0);
 }
 
+
+function ensureToolbarVisible() {
+  if (docViewerToolbar) {
+    ensureToolbarVisible();
+const isMarkdown = currentActiveContainer?.dataset?.isMarkdown === 'true';
+    resetToolbarStyles(docViewerToolbar, isMarkdown ? "desde ensureToolbarVisible (Markdown)" : "desde ensureToolbarVisible (HTML)");
+  }
+}
+
 // --- EVENT LISTENERS ---
 gridBtn.addEventListener('click', () => {
   changeViewMode('grid');
@@ -187,8 +196,8 @@ toggleSearchBtnHeader.addEventListener('click', () => {
 
   if (currentActiveContainer) {
       if (!stylesResetApplied) { 
-          docViewerToolbar.classList.remove('hidden');
-      }
+          ensureToolbarVisible();
+}
       // If stylesResetApplied is true, resetToolbarStyles handles visibility.
   } else {
       docViewerToolbar.classList.add('hidden');
@@ -229,8 +238,8 @@ searchInputMain.addEventListener('input', e => {
           // This case should ideally not happen if search bar is hidden, but as a safeguard
           // if a search term was entered, then search bar hidden quickly.
       } else if (currentActiveContainer) {
-          docViewerToolbar.classList.remove('hidden');
-          // console.log("searchInputMain input: docViewerToolbar forced visible if currentActiveContainer");
+          ensureToolbarVisible();
+// console.log("searchInputMain input: docViewerToolbar forced visible if currentActiveContainer");
       }
   }, 300);
 });
@@ -301,8 +310,8 @@ async function openDoc(path, title) {
   clearView(); 
   
   homeView.style.display = 'none'; 
-  docViewerToolbar.classList.remove('hidden'); 
-  // console.log("openDoc: docViewerToolbar.classList.remove('hidden') llamado");
+  ensureToolbarVisible();
+// console.log("openDoc: docViewerToolbar.classList.remove('hidden') llamado");
 
   docViewerTitleText.textContent = title;
   currentDocumentTitle = title;
@@ -413,8 +422,8 @@ function performSearch(term) {
   if (!term) {
     searchResultsBar.classList.add('hidden');
     if (currentActiveContainer) { // Asegurar que la toolbar del visor NO se oculte
-        docViewerToolbar.classList.remove('hidden');
-        // console.log("performSearch (término vacío): docViewerToolbar forzada a visible");
+        ensureToolbarVisible();
+// console.log("performSearch (término vacío): docViewerToolbar forzada a visible");
     }
     return;
   }
@@ -435,8 +444,8 @@ function performSearch(term) {
       }
       updateResultsUI();
       if (currentActiveContainer) { // Asegurar que la toolbar del visor esté visible
-        docViewerToolbar.classList.remove('hidden');
-        // console.log("performSearch (done): docViewerToolbar forzada a visible");
+        ensureToolbarVisible();
+// console.log("performSearch (done): docViewerToolbar forzada a visible");
       }
     },
     noMatch: (_term) => {
@@ -444,8 +453,8 @@ function performSearch(term) {
         searchResultsBar.classList.add('hidden');
         updateResultsUI();
         if (currentActiveContainer) { // Asegurar que la toolbar del visor esté visible
-            docViewerToolbar.classList.remove('hidden');
-            // console.log("performSearch (noMatch): docViewerToolbar forzada a visible");
+            ensureToolbarVisible();
+// console.log("performSearch (noMatch): docViewerToolbar forzada a visible");
         }
     }
   });
