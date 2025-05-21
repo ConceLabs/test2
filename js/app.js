@@ -99,6 +99,56 @@ function updateActiveButton(activeBtn, inactiveBtn) {
   if (inactiveBtn) inactiveBtn.classList.remove('active');
 }
 
+function _applyDiagnosticStyles(toolbarElement, context, backgroundColor) {
+    if (!toolbarElement) {
+        console.error('Diagnostic styles: Toolbar element not found. Context:', context);
+        return;
+    }
+    console.log(`Applying diagnostic styles to toolbar. Context: [${context}], Background: [${backgroundColor}]`);
+    
+    toolbarElement.style.setProperty('display', 'flex', 'important');
+    toolbarElement.style.setProperty('visibility', 'visible', 'important');
+    toolbarElement.style.setProperty('opacity', '1', 'important');
+    toolbarElement.style.setProperty('height', '48px', 'important'); // Assuming var(--toolbar-height) is 48px
+    toolbarElement.style.setProperty('position', 'sticky', 'important');
+    toolbarElement.style.setProperty('top', '0px', 'important');
+    toolbarElement.style.setProperty('left', '0px', 'important');
+    toolbarElement.style.setProperty('width', '100%', 'important');
+    toolbarElement.style.setProperty('z-index', '20000', 'important'); // Very high z-index
+    toolbarElement.style.setProperty('background-color', backgroundColor, 'important');
+    toolbarElement.style.setProperty('border', '3px solid lime', 'important'); // Increased border for visibility
+    toolbarElement.style.setProperty('color', 'black', 'important'); // Ensure text on buttons is visible
+}
+
+function resetToolbarStyles(toolbarElement, context) {
+    if (!toolbarElement) {
+        console.error('resetToolbarStyles: Toolbar element not found. Context:', context);
+        return;
+    }
+    // console.log(`Resetting toolbar styles. Context: [${context}]`);
+
+    toolbarElement.style.setProperty('display', 'flex');
+    toolbarElement.style.setProperty('visibility', 'visible');
+    toolbarElement.style.setProperty('opacity', '1');
+    toolbarElement.style.setProperty('height', 'var(--toolbar-height)');
+    toolbarElement.style.setProperty('position', 'sticky');
+    toolbarElement.style.setProperty('top', '0px');
+    toolbarElement.style.setProperty('left', '0px');
+    toolbarElement.style.setProperty('width', '100%');
+    toolbarElement.style.setProperty('z-index', '200'); // Original z-index from CSS
+    toolbarElement.style.setProperty('background-color', 'var(--card-bg)'); // Original background from CSS
+    
+    // Reset all borders first then apply the specific one it needs
+    toolbarElement.style.setProperty('border', 'none'); 
+    toolbarElement.style.setProperty('border-bottom', '1px solid #e0e0e0'); // From .toolbar CSS in stylesheet
+
+    // Gentle repaint trigger
+    toolbarElement.style.setProperty('transform', 'translateZ(0)');
+    setTimeout(() => {
+        toolbarElement.style.removeProperty('transform');
+    }, 0);
+}
+
 // --- EVENT LISTENERS ---
 gridBtn.addEventListener('click', () => {
   changeViewMode('grid');
@@ -118,6 +168,7 @@ btnZoomOut.addEventListener('click', () => changeGlobalZoom(-1));
 toggleSearchBtnHeader.addEventListener('click', () => {
   const isNowHidden = searchBarContainer.classList.toggle('hidden');
   document.body.classList.toggle('search-bar-visible', !isNowHidden);
+  let stylesResetApplied = false; // Changed from diagnosticApplied
   
   if (!isNowHidden) { 
     searchInputMain.focus();
@@ -126,14 +177,21 @@ toggleSearchBtnHeader.addEventListener('click', () => {
     }
   } else { 
     searchResultsBar.classList.add('hidden'); 
+    if (currentActiveContainer) {
+        const isDocMarkdown = currentActiveContainer.dataset.isMarkdown === 'true';
+        // _applyDiagnosticStyles removed
+        resetToolbarStyles(docViewerToolbar, isDocMarkdown ? "Markdown doc, search bar closed" : "HTML doc, search bar closed");
+        stylesResetApplied = true; 
+    }
   }
 
   if (currentActiveContainer) {
-    docViewerToolbar.classList.remove('hidden');
-    // console.log("toggleSearchBtnHeader: docViewerToolbar forzada a visible (si hay currentActiveContainer)");
+      if (!stylesResetApplied) { 
+          docViewerToolbar.classList.remove('hidden');
+      }
+      // If stylesResetApplied is true, resetToolbarStyles handles visibility.
   } else {
-    docViewerToolbar.classList.add('hidden');
-    // console.log("toggleSearchBtnHeader: docViewerToolbar forzada a oculta (NO hay currentActiveContainer)");
+      docViewerToolbar.classList.add('hidden');
   }
 });
 
@@ -327,19 +385,15 @@ function changeGlobalZoom(delta) {
 function clearHighlights() {
   // console.log("clearHighlights()");
   if (markInstance && currentActiveContainer) {
-    const isMarkdownDocument = currentActiveContainer.dataset.isMarkdown === 'true'; // Moved BEFORE unmark()
+    // const isMarkdownDocument = currentActiveContainer.dataset.isMarkdown === 'true'; // Already got this for diagnostics, ensure it's here or re-declare
+    // If not already declared in this scope, uncomment the line above or ensure it's available.
+    // For safety, let's re-evaluate it here based on currentActiveContainer which is confirmed.
+    const isDocMarkdown = currentActiveContainer.dataset.isMarkdown === 'true';
     markInstance.unmark();
-    // console.log('Toolbar repaint trick after unmark for', isMarkdownDocument ? 'Markdown' : 'HTML', 'document.');
-    docViewerToolbar.style.transition = 'none'; // Disable transitions during the flicker
-    docViewerToolbar.style.opacity = '0.999';    // Slightly change opacity to trigger repaint/reflow
-    setTimeout(() => {
-        docViewerToolbar.style.opacity = '1';    // Restore opacity
-        docViewerToolbar.style.transition = '';  // Re-enable transitions
-    }, 0); // setTimeout ensures this runs after the current execution stack
-    markInstance = null; // Ensured to be AFTER the new block
+    markInstance = null;
+    // _applyDiagnosticStyles removed
+    resetToolbarStyles(docViewerToolbar, isDocMarkdown ? "Markdown doc, after clearHighlights" : "HTML doc, after clearHighlights");
   } else if (markInstance) { 
-    // Fallback for when currentActiveContainer might be null (though less likely with current logic)
-    // The repaint trick is specifically for when currentActiveContainer is defined.
     markInstance.unmark();
     markInstance = null;
   }
