@@ -1,19 +1,24 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="utf-8"/>
-<base href="./"/>
-<title>Biblioteca Jurídica – ANF</title>
-<meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" name="viewport"/>
-<meta name="theme-color" content="#1f334d">
-<link href="manifest.json" rel="manifest"/>
-<link href="favicon.ico" rel="icon"/>
-<link href="apple-touch-icon.png" rel="apple-touch-icon"/> <!-- Asegúrate que este exista o ajusta el manifest -->
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/mark.js@8.11.1/dist/mark.min.js"></script>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
-<link href="estilo_juridico_optimizado.css" rel="stylesheet"/>
-<!-- highlight.js se carga en el body ahora para que esté después de los elementos -->
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+  <meta name="theme-color" content="#1f334d">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="BiblioANF">
+  <meta name="description" content="Consulta y navegación de minutas y normativa penal.">
+  <title>Biblioteca Jurídica – ANF</title>
+  <!-- Manifest y favicon con rutas absolutas para GitHub Pages en /test2/ -->
+  <link href="/test2/manifest.json" rel="manifest"/>
+  <link href="/test2/favicon.ico" rel="icon"/>
+  <!-- Ícono para iOS (ajusta el tamaño/ruta si es necesario) -->
+  <link rel="apple-touch-icon" href="/test2/icons/icon-192.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="estilo_juridico_optimizado.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mark.js@8.11.1/dist/mark.min.js"></script>
 </head>
 <body>
 
@@ -21,18 +26,16 @@
   <div class="spinner"></div>
 </div>
 
-<header class="main-header"> <!-- Renombrado para claridad, no solo búsqueda -->
+<header class="main-header">
   <div class="title-bar">
     <img alt="Logo ANF" class="logo" src="logo-1.png"/>
     <h1>Biblioteca Jurídica</h1>
-    <!-- Botón de búsqueda va aquí, siempre visible en esta barra -->
     <button id="toggle-search-btn-header" class="btn btn-icon" aria-label="Abrir/Cerrar búsqueda">
         <i class="fa-solid fa-magnifying-glass"></i>
     </button>
   </div>
 </header>
 
-<!-- La barra de búsqueda ahora es un elemento separado, no anidado en el header -->
 <div class="search-bar-container hidden" id="search-bar-container">
     <i class="fa-solid fa-magnifying-glass search-bar-icon"></i>
     <input id="search-input-main" placeholder="Buscar en documento…" aria-label="Campo de búsqueda en documento"/>
@@ -41,7 +44,6 @@
     </button>
 </div>
 
-
 <div id="app">
   <div id="home-view">
     <div class="toolbar" id="view-toolbar">
@@ -49,16 +51,14 @@
         <button class="btn active" id="grid-view-btn" aria-label="Vista de cuadrícula"><i class="fa-solid fa-table-cells"></i></button>
         <button class="btn" id="list-view-btn" aria-label="Vista de lista"><i class="fa-solid fa-list"></i></button>
       </div>
-      <!-- Podrías tener un buscador global aquí si quisieras buscar títulos, no contenido -->
     </div>
     <div class="doc-list-container" id="docListContainer">
       <div class="doc-grid" id="docList"></div>
     </div>
   </div>
 
-  <!-- Toolbar para la vista de documento -->
   <div class="toolbar hidden" id="doc-viewer-toolbar">
-    <button class="btn btn-icon" id="btn-back-to-home" aria-label="Volver al inicio"><i class="fa-solid fa-arrow-left"></i></button> <!-- Cambiado icono -->
+    <button class="btn btn-icon" id="btn-back-to-home" aria-label="Volver al inicio"><i class="fa-solid fa-arrow-left"></i></button>
     <span id="doc-viewer-title-text" class="doc-viewer-title"></span>
     <div class="zoom-controls">
       <button class="btn btn-icon zoom-btn" id="btn-font-decrease" aria-label="Reducir tamaño de fuente"><i class="fa-solid fa-minus"></i></button>
@@ -76,16 +76,14 @@
     <div class="minutas-controls">
       <select class="cat-filter" id="minutas-catFilter" aria-label="Filtrar minutas por categoría">
         <option value="all">Todas las categorías</option>
-        <!-- Opciones se llenan por JS -->
       </select>
     </div>
     <div class="doc-list-container" id="minutasDocListContainer">
-       <div id="minutas-docList" class="doc-grid"></div> <!-- Clase inicial por defecto -->
+       <div id="minutas-docList" class="doc-grid"></div>
     </div>
     <div id="minutas-viewer" class="viewer-container"></div>
   </div>
 
-  <!-- Barra de resultados de búsqueda (flotante) -->
   <div class="search-results-bar hidden" id="search-results-bar">
     <button id="prev-result-btn" class="btn btn-icon" aria-label="Resultado anterior"><i class="fa-solid fa-chevron-up"></i></button>
     <span id="result-counter-span">0 de 0</span>
@@ -96,18 +94,17 @@
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css"></script> <!-- Esto es un CSS, debe estar en head -->
 <script>
-  // Registro del Service Worker (sin cambios)
+  // Registro del Service Worker para GitHub Pages en /test2/
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js')
+      navigator.serviceWorker.register('/test2/sw.js')
         .then(registration => { console.log('SW registered: ', registration.scope); })
         .catch(err => { console.error('SW registration failed: ', err); });
     });
   }
-  // Inicializar highlight.js (si tienes bloques de código)
-  // hljs.highlightAll(); // O llamar después de cargar contenido dinámico
+  // Inicializar highlight.js si tienes bloques de código
+  // hljs.highlightAll(); // O llama después de cargar contenido dinámico
 </script>
 <script src="js/app.js"></script>
 </body>
