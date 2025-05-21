@@ -271,6 +271,9 @@ async function openDoc(path, title) {
       return;
   }
   currentActiveContainer = targetViewer; 
+  if (currentActiveContainer) {
+      currentActiveContainer.dataset.isMarkdown = path.endsWith('.md').toString();
+  }
 
   try {
     const response = await fetch(path);
@@ -323,7 +326,20 @@ function changeGlobalZoom(delta) {
 // --- FUNCIONES DE BÚSQUEDA ---
 function clearHighlights() {
   // console.log("clearHighlights()");
-  if (markInstance) {
+  if (markInstance && currentActiveContainer) {
+    const isMarkdownDocument = currentActiveContainer.dataset.isMarkdown === 'true'; // Moved BEFORE unmark()
+    markInstance.unmark();
+    // console.log('Toolbar repaint trick after unmark for', isMarkdownDocument ? 'Markdown' : 'HTML', 'document.');
+    docViewerToolbar.style.transition = 'none'; // Disable transitions during the flicker
+    docViewerToolbar.style.opacity = '0.999';    // Slightly change opacity to trigger repaint/reflow
+    setTimeout(() => {
+        docViewerToolbar.style.opacity = '1';    // Restore opacity
+        docViewerToolbar.style.transition = '';  // Re-enable transitions
+    }, 0); // setTimeout ensures this runs after the current execution stack
+    markInstance = null; // Ensured to be AFTER the new block
+  } else if (markInstance) { 
+    // Fallback for when currentActiveContainer might be null (though less likely with current logic)
+    // The repaint trick is specifically for when currentActiveContainer is defined.
     markInstance.unmark();
     markInstance = null;
   }
