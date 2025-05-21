@@ -4,7 +4,7 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Calculadora Abonos por Arresto</title>
-  <style><CODE_BLOCK>/* Specificity increased by adding html */
+  <style>
     body {
       font-family: sans-serif;
       background-color: #f4f4f4;
@@ -12,9 +12,8 @@
       justify-content: center;
       align-items: center;
       min-height: 100vh;
-      margin: 0;  /* Ensure no default body margins */
-    } /* Added comment for clarity */
-
+      margin: 0;
+    }
     .calculator {
       background-color: #fff;
       padding: 20px;
@@ -22,22 +21,18 @@
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
       width: 300px;
     }
-
     h1 {
       text-align: center;
       color: #333;
     }
-
     .form-group {
       margin-bottom: 15px;
     }
-
     label {
       display: block;
       margin-bottom: 5px;
       font-weight: bold;
     }
-
     input[type="date"],
     input[type="number"] {
       width: 100%;
@@ -46,7 +41,6 @@
       border: 1px solid #ccc;
       border-radius: 4px;
     }
-
     button {
       background-color: #4CAF50;
       color: white;
@@ -56,11 +50,9 @@
       cursor: pointer;
       width: 100%;
     }
-
     button:hover {
       background-color: #45a049;
     }
-
     #result {
       margin-top: 20px;
       padding: 10px;
@@ -68,53 +60,41 @@
       border-radius: 4px;
       background-color: #f9f9f9;
     }
-
     .result-message {
       font-weight: bold;
       margin-bottom: 5px;
     }
-
     .result-details {
       font-style: italic;
       color: #555;
     }
-  
-/* Apply styles specifically within .calculator to avoid conflicts */
-html body .calculator .abono-result { /* Further increased specificity */
-  background-color: #e9ecef;
-  padding: 15px;
-  border-radius: 8px;
-  margin-top: 15px;
-  text-align: center;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-html body .calculator .abono-result p {
-  font-size: 1.1em;
-  margin: 5px 0;
-}
-
-html body .calculator .abono-result .valor {
-  font-size: 1.5em;
-  font-weight: bold;
-  color: #28a745;
-}
-
-/* Corrected class name and applied to the specific element */
-html body .calculator #result { /* Style the container */
-  margin-top: 20px;
-  /* Add other styles for the result container if needed */
-}
-  
-    /* Media query para pantallas pequeñas (móviles) */
+    html body .calculator .abono-result {
+      background-color: #e9ecef;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 15px;
+      text-align: center;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    html body .calculator .abono-result p {
+      font-size: 1.1em;
+      margin: 5px 0;
+    }
+    html body .calculator .abono-result .valor {
+      font-size: 1.5em;
+      font-weight: bold;
+      color: #28a745;
+    }
+    html body .calculator #result {
+      margin-top: 20px;
+    }
     @media (max-width: 480px) {
       .calculator {
-        width: 90%; /* Ocupa un poco menos del ancho en móviles */
+        width: 90%;
         padding: 15px;
       }
-    } /* Ensure the media query applies specifically */
-  
-  </CODE_BLOCK></style>
+    }
+  </style>
 </head>
 <body>
 
@@ -133,9 +113,9 @@ html body .calculator #result { /* Style the container */
       <input type="number" id="nonComplianceDays" min="0" value="0" required>
     </div>
     <button id="calculateBtn">Calcular días y abono</button>
-    <div id="result" style="display: none;"> <!-- Keep the inline style for initial state -->
-      <div class="result-message">Resultados:</div>  <!-- Added a title for clarity -->
-      <div class="result-details"> <!-- Ensure this structure is correct -->
+    <div id="result" style="display: none;">
+      <div class="result-message">Resultados:</div>
+      <div class="result-details">
         <p>Período total: <span id="totalDays"></span></p>
         <p>Días efectivos de arresto: <span id="effectiveDays"></span></p>
       </div>
@@ -164,7 +144,6 @@ html body .calculator #result { /* Style the container */
         if (evt.key === 'Enter') calcular();
       }));
       
-      // Mejorar la experiencia móvil ocultando el teclado al pulsar calcular
       btn.addEventListener('touchstart', function() {
         document.activeElement.blur();
       });
@@ -178,20 +157,13 @@ html body .calculator #result { /* Style the container */
         const efectivos = diff - inc;
         const abono = (efectivos * 8) / 12;
 
-        // Mostrar resultados
         document.getElementById('totalDays').textContent = `${diff} día${diff !== 1 ? 's' : ''}`;
         document.getElementById('effectiveDays').textContent = efectivos;
         document.getElementById('abonoDays').textContent = abono.toFixed(2);
-        
-       // Show the result by removing the inline style
-       out.style.display = '';
-       // Optional: Scroll to the result
-       out.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+        out.style.display = '';
+        out.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       }
-
-      // Lógica inicial (opcional)
-      // calcular(); // Calcula y muestra un resultado inicial
-
     })();
   </script>
 
