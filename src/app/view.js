@@ -1,3 +1,4 @@
+import { showLoading, updateActiveButton } from "./utils.js";
 // === ELEMENTOS DEL DOM ===
 const loadingSpinner = document.getElementById('loading-spinner');
 
@@ -94,11 +95,6 @@ const docsMinutas = [
 ];
 
 // --- FUNCIONES AUXILIARES ---
-function showLoading(show) { loadingSpinner.classList.toggle('hidden', !show); }
-function updateActiveButton(activeBtn, inactiveBtn) {
-  if (activeBtn) activeBtn.classList.add('active');
-  if (inactiveBtn) inactiveBtn.classList.remove('active');
-}
 
 function _applyDiagnosticStyles(toolbarElement, context, backgroundColor) {
     if (!toolbarElement) {
@@ -311,7 +307,7 @@ function clearView() {
 
 async function openDoc(path, title) {
   // console.log(`openDoc() llamado con path: ${path}, title: ${title}`);
-  showLoading(true);
+  showLoading(loadingSpinner, true);
   clearView(); 
   
   homeView.style.display = 'none'; 
@@ -339,7 +335,7 @@ async function openDoc(path, title) {
 
   if (!targetViewer) {
       console.error("CRITICAL: targetViewer no se estableció.");
-      showLoading(false);
+      showLoading(loadingSpinner, false);
       return;
   }
   currentActiveContainer = targetViewer; 
@@ -351,7 +347,7 @@ async function openDoc(path, title) {
     if (location.protocol === 'file:' && path.endsWith('.html')) {
       targetViewer.innerHTML = `<iframe src="${path}" class="embedded-iframe"></iframe>`;
       document.title = `${title} – Biblioteca Jurídica`;
-      showLoading(false);
+      showLoading(loadingSpinner, false);
       return;
     }
 
@@ -383,7 +379,7 @@ async function openDoc(path, title) {
         targetViewer.innerHTML = `<div class="error-container" style="padding:1rem; color:red;"><h4>Error al cargar documento:</h4><p>${path}</p><p>${err.message}</p></div>`;
     }
   } finally {
-    showLoading(false);
+    showLoading(loadingSpinner, false);
     if (targetViewer) targetViewer.scrollTop = 0;
   }
 }
@@ -533,44 +529,43 @@ function loadMinutas() {
 }
 
 // --- INICIALIZACIÓN ---
-document.addEventListener('DOMContentLoaded', () => {
-    // console.log("DOMContentLoaded");
-    const minutasCategories = [...new Set(docsMinutas.map(m => m.category).filter(Boolean))].sort();
-    minutasCatFilter.innerHTML = '<option value="all">Todas las categorías</option>';
-    minutasCategories.forEach(cat => {
-        const option = document.createElement('option');
-        option.value = cat;
-        option.textContent = cat;
-        minutasCatFilter.appendChild(option);
-    });
-    
-    if (window.location.hash === '#minutas') {
-        showMinutasListView();
-    } else {
-        showHome();
-        if (docList) loadDocs();
-    }
-    
-    const savedView = localStorage.getItem('bibliotecaViewMode') || 'grid';
-    if (gridBtn && listBtn) {
-        changeViewMode(savedView);
-        updateActiveButton(savedView === 'grid' ? gridBtn : listBtn, savedView === 'grid' ? listBtn : gridBtn);
-    }
 
-    const savedZoomIndex = parseInt(localStorage.getItem('bibliotecaZoomIndex'));
-    if (!isNaN(savedZoomIndex) && savedZoomIndex >= 0 && savedZoomIndex < zoomLevels.length) {
-        currentZoomIndex = savedZoomIndex;
-    }
-    applyGlobalZoom();
+export function initializeApp() {
+  const minutasCategories = [...new Set(docsMinutas.map(m => m.category).filter(Boolean))].sort();
+  minutasCatFilter.innerHTML = '<option value="all">Todas las categorías</option>';
+  minutasCategories.forEach(cat => {
+      const option = document.createElement('option');
+      option.value = cat;
+      option.textContent = cat;
+      minutasCatFilter.appendChild(option);
+  });
 
-    if(clearSearchInputBtn) clearSearchInputBtn.classList.add('hidden');
-    if(searchResultsBar) searchResultsBar.classList.add('hidden');
-});
+  if (window.location.hash === '#minutas') {
+      showMinutasListView();
+  } else {
+      showHome();
+      if (docList) loadDocs();
+  }
 
-window.addEventListener('beforeunload', () => {
-    // console.log("beforeunload - guardando preferencias");
-    if (docList && docList.classList) {
-        localStorage.setItem('bibliotecaViewMode', docList.classList.contains('doc-grid') ? 'grid' : 'list');
-    }
-    localStorage.setItem('bibliotecaZoomIndex', currentZoomIndex.toString());
-});
+  const savedView = localStorage.getItem('bibliotecaViewMode') || 'grid';
+  if (gridBtn && listBtn) {
+      changeViewMode(savedView);
+      updateActiveButton(savedView === 'grid' ? gridBtn : listBtn, savedView === 'grid' ? listBtn : gridBtn);
+  }
+
+  const savedZoomIndex = parseInt(localStorage.getItem('bibliotecaZoomIndex'));
+  if (!isNaN(savedZoomIndex) && savedZoomIndex >= 0 && savedZoomIndex < zoomLevels.length) {
+      currentZoomIndex = savedZoomIndex;
+  }
+  applyGlobalZoom();
+
+  if(clearSearchInputBtn) clearSearchInputBtn.classList.add('hidden');
+  if(searchResultsBar) searchResultsBar.classList.add('hidden');
+
+  window.addEventListener('beforeunload', () => {
+      if (docList && docList.classList) {
+          localStorage.setItem('bibliotecaViewMode', docList.classList.contains('doc-grid') ? 'grid' : 'list');
+      }
+      localStorage.setItem('bibliotecaZoomIndex', currentZoomIndex.toString());
+  });
+}
