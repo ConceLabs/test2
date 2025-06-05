@@ -57,16 +57,17 @@
     </div>
   </div>
 
-  <div class="toolbar hidden" id="doc-viewer-toolbar">
-    <button class="btn btn-icon" id="btn-back-to-home" aria-label="Volver al inicio"><i class="fa-solid fa-arrow-left"></i></button>
-    <span id="doc-viewer-title-text" class="doc-viewer-title"></span>
-    <div class="zoom-controls">
-      <button class="btn btn-icon zoom-btn" id="btn-font-decrease" aria-label="Reducir tamaño de fuente"><i class="fa-solid fa-minus"></i></button>
-      <button class="btn btn-icon zoom-btn" id="btn-font-increase" aria-label="Aumentar tamaño de fuente"><i class="fa-solid fa-plus"></i></button>
+  <div id="viewer-section" class="hidden">
+    <div class="toolbar hidden" id="doc-viewer-toolbar">
+      <button class="btn btn-icon" id="btn-back-to-home" aria-label="Volver al inicio"><i class="fa-solid fa-arrow-left"></i></button>
+      <span id="doc-viewer-title-text" class="doc-viewer-title"></span>
+      <div class="zoom-controls">
+        <button class="btn btn-icon zoom-btn" id="btn-font-decrease" aria-label="Reducir tamaño de fuente"><i class="fa-solid fa-minus"></i></button>
+        <button class="btn btn-icon zoom-btn" id="btn-font-increase" aria-label="Aumentar tamaño de fuente"><i class="fa-solid fa-plus"></i></button>
+      </div>
     </div>
+    <div id="viewer" class="viewer-container"></div>
   </div>
-
-  <div id="viewer" class="viewer-container"></div>
 
   <div id="minutas-view" class="hidden">
     <header class="minutas-header">
