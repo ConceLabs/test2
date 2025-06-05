@@ -348,10 +348,17 @@ async function openDoc(path, title) {
   }
 
   try {
+    if (location.protocol === 'file:' && path.endsWith('.html')) {
+      targetViewer.innerHTML = `<iframe src="${path}" class="embedded-iframe"></iframe>`;
+      document.title = `${title} – Biblioteca Jurídica`;
+      showLoading(false);
+      return;
+    }
+
     const response = await fetch(path);
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status} for ${path}`);
     const content = await response.text();
-    
+
     if (path.endsWith('.html')) {
       targetViewer.innerHTML = content;
     } else if (path.endsWith('.md')) {
