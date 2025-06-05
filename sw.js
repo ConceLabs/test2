@@ -4,7 +4,7 @@ const urlsToCache = [
   '/test2/', // Página principal
   '/test2/index.html',
   '/test2/estilo_juridico_optimizado.css',
-  '/test2/js/app.js',
+  '/test2/dist/app.js',
   '/test2/manifest.json',
   '/test2/favicon.ico',
   '/test2/apple-touch-icon.png',
