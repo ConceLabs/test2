@@ -25,7 +25,6 @@ const urlsToCache = [
   '/test2/docs/documento2.html',
   '/test2/docs/documento3.html',
   '/test2/docs/documento4.html',
-  '/test2/docs/documento5..html',
   '/test2/docs/documento5.html',
   '/test2/docs/documento6.html',
   '/test2/docs/documento7.html',
