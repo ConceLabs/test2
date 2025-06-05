@@ -9,12 +9,12 @@ const urlsToCache = [
   '/test2/favicon.ico',
   '/test2/apple-touch-icon.png',
   '/test2/logo-1.png',
-  // URLs de CDNs
-  'https://cdn.jsdelivr.net/npm/marked/marked.min.js',
-  'https://cdn.jsdelivr.net/npm/mark.js@8.11.1/dist/mark.min.js',
-  'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css',
-  'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js',
-  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css',
+  // Recursos locales
+  '/test2/vendor/marked.min.js',
+  '/test2/vendor/mark.min.js',
+  '/test2/vendor/github.min.css',
+  '/test2/vendor/highlight.min.js',
+  '/test2/vendor/fontawesome.min.css',
   // Si tienes una página offline, descomenta la siguiente línea:
   // '/test2/offline.html',
 ];
