@@ -94,11 +94,17 @@ body.search-bar-visible #app {
 #viewer {
   flex-grow: 1;
 }
-.viewer-container h1, .viewer-container h2, .viewer-container h3, .viewer-container h4, .viewer-container h5, .viewer-container h6, 
+.viewer-container h1, .viewer-container h2, .viewer-container h3, .viewer-container h4, .viewer-container h5, .viewer-container h6,
 .viewer-container p, .viewer-container li, .viewer-container span, .viewer-container div, .viewer-container pre, .viewer-container code,
 .viewer-container table, .viewer-container td, .viewer-container th, .viewer-container strong, .viewer-container em {
     font-size: inherit !important;
     line-height: inherit !important;
+}
+
+.embedded-iframe {
+  width: 100%;
+  height: 100vh;
+  border: none;
 }
 
 
