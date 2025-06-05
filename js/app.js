@@ -151,11 +151,15 @@ function resetToolbarStyles(toolbarElement, context) {
 
 
 function ensureToolbarVisible() {
-  if (docViewerToolbar) {
-    ensureToolbarVisible();
-const isMarkdown = currentActiveContainer?.dataset?.isMarkdown === 'true';
-    resetToolbarStyles(docViewerToolbar, isMarkdown ? "desde ensureToolbarVisible (Markdown)" : "desde ensureToolbarVisible (HTML)");
-  }
+  if (!docViewerToolbar) return;
+  const isMarkdown = currentActiveContainer?.dataset?.isMarkdown === 'true';
+  docViewerToolbar.classList.remove('hidden');
+  resetToolbarStyles(
+    docViewerToolbar,
+    isMarkdown
+      ? 'desde ensureToolbarVisible (Markdown)'
+      : 'desde ensureToolbarVisible (HTML)'
+  );
 }
 
 // --- EVENT LISTENERS ---
@@ -355,8 +359,8 @@ async function openDoc(path, title) {
       targetViewer.innerHTML = `<pre>${content}</pre>`;
     }
     
-    if (typeof hljs !== 'undefined' && path.endsWith('.html')) {
-        targetViewer.querySelectorAll('pre code').forEach((block) => {
+    if (typeof hljs !== 'undefined') {
+        targetViewer.querySelectorAll('pre code').forEach(block => {
             hljs.highlightElement(block);
         });
     }
