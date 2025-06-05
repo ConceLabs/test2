@@ -14,6 +14,7 @@ const btnBackToHome = document.getElementById('btn-back-to-home');
 const btnZoomIn = document.getElementById('btn-font-increase');
 const btnZoomOut = document.getElementById('btn-font-decrease');
 const viewer = document.getElementById('viewer');
+const viewerSection = document.getElementById('viewer-section');
 
 const minutasView = document.getElementById('minutas-view');
 const homeBtnMinutas = document.getElementById('home-btn-minutas');
@@ -286,9 +287,9 @@ function showHome() {
   // console.log("showHome() llamado");
   homeView.style.display = 'flex';
   minutasView.classList.add('hidden');
-  viewer.style.display = 'none';
+  if (viewerSection) viewerSection.classList.add('hidden');
   minutasViewer.style.display = 'none';
-  docViewerToolbar.classList.add('hidden'); 
+  docViewerToolbar.classList.add('hidden');
 
   searchBarContainer.classList.add('hidden'); 
   document.body.classList.remove('search-bar-visible');
@@ -323,16 +324,16 @@ async function openDoc(path, title) {
 
   let targetViewer;
   if (path.startsWith('minutas/')) {
-    minutasView.classList.remove('hidden'); 
-    minutasDocListContainer.style.display = 'none'; 
+    minutasView.classList.remove('hidden');
+    minutasDocListContainer.style.display = 'none';
     if (minutasCatFilter.parentElement) minutasCatFilter.parentElement.style.display = 'none';
-    viewer.style.display = 'none'; 
-    minutasViewer.style.display = 'block'; 
+    if (viewerSection) viewerSection.classList.add('hidden');
+    minutasViewer.style.display = 'block';
     targetViewer = minutasViewer;
   } else {
-    minutasView.classList.add('hidden'); 
-    minutasViewer.style.display = 'none'; 
-    viewer.style.display = 'block'; 
+    minutasView.classList.add('hidden');
+    minutasViewer.style.display = 'none';
+    if (viewerSection) viewerSection.classList.remove('hidden');
     targetViewer = viewer;
   }
 
@@ -497,7 +498,7 @@ function updateResultsUI() {
 function showMinutasListView() {
   // console.log("showMinutasListView()");
   homeView.style.display = 'none';
-  viewer.style.display = 'none';
+  if (viewerSection) viewerSection.classList.add('hidden');
   minutasViewer.style.display = 'none';
   docViewerToolbar.classList.add('hidden'); 
   

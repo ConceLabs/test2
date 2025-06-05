@@ -72,14 +72,27 @@ body.search-bar-visible #app {
   padding: 0.75rem;
 }
 
-.viewer-container, 
-#viewer, 
+.viewer-container,
 #minutas-viewer {
   display: none; /* Controlado por JS */
   /* flex-grow y overflow-y ya están en .viewer-container arriba */
-  padding: 1rem 1.25rem; 
+  padding: 1rem 1.25rem;
   background: #fff; line-height: 1.7; text-align: justify;
   position: relative; /* Para que z-index de hijos sea relativo a él si es necesario */
+}
+
+#viewer-section {
+  display: none; /* Controlado por JS */
+  flex-grow: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+}
+
+#viewer {
+  flex-grow: 1;
 }
 .viewer-container h1, .viewer-container h2, .viewer-container h3, .viewer-container h4, .viewer-container h5, .viewer-container h6, 
 .viewer-container p, .viewer-container li, .viewer-container span, .viewer-container div, .viewer-container pre, .viewer-container code,
